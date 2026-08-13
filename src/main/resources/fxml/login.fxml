@@ -12,23 +12,31 @@
       fx:controller="com.tutorly.controller.LoginController"
       alignment="CENTER"
       spacing="15"
+      prefWidth="1000"
+      prefHeight="700"
       styleClass="root">
 
     <padding>
-        <Insets top="40"
+        <Insets top="30"
                 right="40"
-                bottom="40"
+                bottom="30"
                 left="40"/>
     </padding>
 
-    <Label text="Welcome Back"
+    <Label text="Login to Tutorly"
            styleClass="page-title"/>
 
-    <TextField promptText="Email"
+    <TextField fx:id="emailField"
+               promptText="Email"
                maxWidth="350"/>
 
-    <PasswordField promptText="Password"
+    <PasswordField fx:id="passwordField"
+                   promptText="Password"
                    maxWidth="350"/>
+
+    <Label fx:id="messageLabel"
+           wrapText="true"
+           maxWidth="350"/>
 
     <Button text="Login"
             onAction="#handleLogin"
@@ -37,8 +45,7 @@
 
     <Button text="Create an account"
             onAction="#handleSignup"
-            maxWidth="350"
-            styleClass="secondary-button"/>
+            styleClass="text-button"/>
 
     <Button text="Back"
             onAction="#handleBack"
