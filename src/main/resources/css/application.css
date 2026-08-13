@@ -1,5 +1,59 @@
-/*
- * Tutorly Application Styles
- *
- * TODO: Implement application-wide styles.
- */
+.root {
+    -fx-font-family: "Ubuntu";
+    -fx-background-color: #f7f8fa;
+}
+
+.navbar {
+    -fx-background-color: white;
+    -fx-padding: 15 30 15 30;
+}
+
+.logo {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+}
+
+.hero-title {
+    -fx-font-size: 40px;
+    -fx-font-weight: bold;
+}
+
+.hero-subtitle {
+    -fx-font-size: 18px;
+}
+
+.feature-text {
+    -fx-font-size: 15px;
+}
+
+.page-title {
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+}
+
+.button {
+    -fx-cursor: hand;
+}
+
+.primary-button {
+    -fx-padding: 10 22 10 22;
+    -fx-font-weight: bold;
+}
+
+.secondary-button {
+    -fx-padding: 10 22 10 22;
+}
+
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-padding: 8 15 8 15;
+}
+
+.text-button {
+    -fx-background-color: transparent;
+}
+
+.footer {
+    -fx-padding: 15;
+    -fx-alignment: center;
+}

@@ -1,8 +1,8 @@
 package com.tutorly;
 
-/**
- * TODO: Implement Main.
- */
 public class Main {
 
+    public static void main(String[] args) {
+        App.main(args);
+    }
 }
