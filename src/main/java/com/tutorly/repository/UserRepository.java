@@ -1,7 +1,7 @@
 package com.tutorly.repository;
 
 /**
- * TODO: Implement UserRepository
+ * TODO: Implement UserRepository.
  */
 public class UserRepository {
 

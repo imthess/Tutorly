@@ -1,7 +1,7 @@
 package com.tutorly.repository;
 
 /**
- * TODO: Implement BookingRepository
+ * TODO: Implement BookingRepository.
  */
 public class BookingRepository {
 

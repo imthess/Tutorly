@@ -1,7 +1,7 @@
 package com.tutorly.util;
 
 /**
- * TODO: Implement Session
+ * TODO: Implement Session.
  */
 public class Session {
 

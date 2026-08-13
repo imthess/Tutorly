@@ -1,11 +1,8 @@
 package com.tutorly;
 
-import javafx.application.Application;
-
+/**
+ * TODO: Implement Main.
+ */
 public class Main {
-
-    public static void main(String[] args) {
-        Application.launch(App.class, args);
-    }
 
 }

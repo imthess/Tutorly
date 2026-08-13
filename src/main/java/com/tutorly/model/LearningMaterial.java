@@ -1,7 +1,7 @@
 package com.tutorly.model;
 
 /**
- * TODO: Implement LearningMaterial
+ * TODO: Implement LearningMaterial.
  */
 public class LearningMaterial {
 

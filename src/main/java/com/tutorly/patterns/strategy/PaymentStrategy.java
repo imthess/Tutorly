@@ -1,7 +1,7 @@
 package com.tutorly.patterns.strategy;
 
 /**
- * TODO: Implement PaymentStrategy
+ * TODO: Implement PaymentStrategy.
  */
 public class PaymentStrategy {
 

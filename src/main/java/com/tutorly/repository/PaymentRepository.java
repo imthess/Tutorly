@@ -1,7 +1,7 @@
 package com.tutorly.repository;
 
 /**
- * TODO: Implement PaymentRepository
+ * TODO: Implement PaymentRepository.
  */
 public class PaymentRepository {
 

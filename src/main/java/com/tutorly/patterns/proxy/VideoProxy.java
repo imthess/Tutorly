@@ -1,7 +1,7 @@
 package com.tutorly.patterns.proxy;
 
 /**
- * TODO: Implement VideoProxy
+ * TODO: Implement VideoProxy.
  */
 public class VideoProxy {
 

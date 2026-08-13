@@ -1,7 +1,7 @@
 package com.tutorly.patterns.observer;
 
 /**
- * TODO: Implement Subject
+ * TODO: Implement Subject.
  */
 public class Subject {
 

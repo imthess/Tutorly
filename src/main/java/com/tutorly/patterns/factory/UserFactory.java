@@ -1,7 +1,7 @@
 package com.tutorly.patterns.factory;
 
 /**
- * TODO: Implement UserFactory
+ * TODO: Implement UserFactory.
  */
 public class UserFactory {
 

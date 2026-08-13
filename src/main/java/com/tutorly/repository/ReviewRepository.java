@@ -1,7 +1,7 @@
 package com.tutorly.repository;
 
 /**
- * TODO: Implement ReviewRepository
+ * TODO: Implement ReviewRepository.
  */
 public class ReviewRepository {
 

@@ -1,7 +1,7 @@
 package com.tutorly.model;
 
 /**
- * TODO: Implement ExamResult
+ * TODO: Implement ExamResult.
  */
 public class ExamResult {
 

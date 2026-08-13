@@ -1,7 +1,7 @@
 package com.tutorly.model;
 
 /**
- * TODO: Implement Availability
+ * TODO: Implement Availability.
  */
 public class Availability {
 

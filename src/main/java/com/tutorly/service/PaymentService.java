@@ -1,7 +1,7 @@
 package com.tutorly.service;
 
 /**
- * TODO: Implement PaymentService
+ * TODO: Implement PaymentService.
  */
 public class PaymentService {
 

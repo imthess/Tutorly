@@ -1,7 +1,7 @@
 package com.tutorly.controller;
 
 /**
- * TODO: Implement SplashController
+ * TODO: Implement SplashController.
  */
 public class SplashController {
 

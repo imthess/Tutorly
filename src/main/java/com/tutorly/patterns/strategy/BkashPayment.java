@@ -1,7 +1,7 @@
 package com.tutorly.patterns.strategy;
 
 /**
- * TODO: Implement BkashPayment
+ * TODO: Implement BkashPayment.
  */
 public class BkashPayment {
 

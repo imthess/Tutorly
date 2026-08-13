@@ -1,7 +1,7 @@
 package com.tutorly.patterns.proxy;
 
 /**
- * TODO: Implement VideoService
+ * TODO: Implement VideoService.
  */
 public class VideoService {
 

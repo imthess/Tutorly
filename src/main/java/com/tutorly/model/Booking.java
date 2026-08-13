@@ -1,7 +1,7 @@
 package com.tutorly.model;
 
 /**
- * TODO: Implement Booking
+ * TODO: Implement Booking.
  */
 public class Booking {
 

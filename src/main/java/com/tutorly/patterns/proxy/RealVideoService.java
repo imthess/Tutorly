@@ -1,7 +1,7 @@
 package com.tutorly.patterns.proxy;
 
 /**
- * TODO: Implement RealVideoService
+ * TODO: Implement RealVideoService.
  */
 public class RealVideoService {
 

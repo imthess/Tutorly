@@ -1,7 +1,7 @@
 package com.tutorly.patterns.decorator;
 
 /**
- * TODO: Implement TutorProfile
+ * TODO: Implement TutorProfile.
  */
 public class TutorProfile {
 

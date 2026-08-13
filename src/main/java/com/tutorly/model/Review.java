@@ -1,7 +1,7 @@
 package com.tutorly.model;
 
 /**
- * TODO: Implement Review
+ * TODO: Implement Review.
  */
 public class Review {
 

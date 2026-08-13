@@ -1,7 +1,7 @@
 package com.tutorly.util;
 
 /**
- * TODO: Implement Validator
+ * TODO: Implement Validator.
  */
 public class Validator {
 

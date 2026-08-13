@@ -1,7 +1,7 @@
 package com.tutorly.service;
 
 /**
- * TODO: Implement VideoClassService
+ * TODO: Implement VideoClassService.
  */
 public class VideoClassService {
 

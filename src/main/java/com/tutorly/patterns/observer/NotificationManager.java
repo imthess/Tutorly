@@ -1,7 +1,7 @@
 package com.tutorly.patterns.observer;
 
 /**
- * TODO: Implement NotificationManager
+ * TODO: Implement NotificationManager.
  */
 public class NotificationManager {
 

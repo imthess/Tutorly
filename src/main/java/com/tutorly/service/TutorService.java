@@ -1,7 +1,7 @@
 package com.tutorly.service;
 
 /**
- * TODO: Implement TutorService
+ * TODO: Implement TutorService.
  */
 public class TutorService {
 

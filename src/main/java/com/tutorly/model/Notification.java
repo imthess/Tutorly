@@ -1,7 +1,7 @@
 package com.tutorly.model;
 
 /**
- * TODO: Implement Notification
+ * TODO: Implement Notification.
  */
 public class Notification {
 

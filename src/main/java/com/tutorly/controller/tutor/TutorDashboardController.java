@@ -1,7 +1,7 @@
 package com.tutorly.controller.tutor;
 
 /**
- * TODO: Implement TutorDashboardController
+ * TODO: Implement TutorDashboardController.
  */
 public class TutorDashboardController {
 

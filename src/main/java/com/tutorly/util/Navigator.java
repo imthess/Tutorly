@@ -1,7 +1,7 @@
 package com.tutorly.util;
 
 /**
- * TODO: Implement Navigator
+ * TODO: Implement Navigator.
  */
 public class Navigator {
 

@@ -1,7 +1,7 @@
 package com.tutorly.patterns.strategy;
 
 /**
- * TODO: Implement NagadPayment
+ * TODO: Implement NagadPayment.
  */
 public class NagadPayment {
 

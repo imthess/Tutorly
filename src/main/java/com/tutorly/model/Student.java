@@ -1,7 +1,7 @@
 package com.tutorly.model;
 
 /**
- * TODO: Implement Student
+ * TODO: Implement Student.
  */
 public class Student {
 

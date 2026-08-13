@@ -1,7 +1,7 @@
 package com.tutorly.patterns.observer;
 
 /**
- * TODO: Implement NotificationObserver
+ * TODO: Implement NotificationObserver.
  */
 public class NotificationObserver {
 

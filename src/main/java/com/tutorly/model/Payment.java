@@ -1,7 +1,7 @@
 package com.tutorly.model;
 
 /**
- * TODO: Implement Payment
+ * TODO: Implement Payment.
  */
 public class Payment {
 
