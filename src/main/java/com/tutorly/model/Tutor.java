@@ -9,12 +9,22 @@ public class Tutor extends User {
     private String bio;
 
     public Tutor() {
-        setRole("tutor");
+        super();
     }
 
-    public Tutor(String fullName, String email, String password,
-                 String phone) {
-        super(fullName, email, password, phone, "tutor");
+    public Tutor(
+            String fullName,
+            String email,
+            String password,
+            String phone) {
+
+        super(
+                fullName,
+                email,
+                password,
+                phone,
+                "tutor"
+        );
     }
 
     public int getTutorId() {

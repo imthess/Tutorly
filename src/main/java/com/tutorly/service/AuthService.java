@@ -1,17 +1,25 @@
 package com.tutorly.service;
 
+import com.tutorly.database.DatabaseConnection;
 import com.tutorly.model.User;
 import com.tutorly.patterns.factory.UserFactory;
+import com.tutorly.repository.StudentRepository;
+import com.tutorly.repository.TutorRepository;
 import com.tutorly.repository.UserRepository;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final StudentRepository studentRepository;
+    private final TutorRepository tutorRepository;
 
     public AuthService() {
         this.userRepository = new UserRepository();
+        this.studentRepository = new StudentRepository();
+        this.tutorRepository = new TutorRepository();
     }
 
     public User register(
@@ -19,7 +27,8 @@ public class AuthService {
             String email,
             String password,
             String phone,
-            String role) throws SQLException {
+            String role
+    ) throws SQLException {
 
         validateRegistration(
                 fullName,
@@ -42,21 +51,62 @@ public class AuthService {
                 phone
         );
 
-        userRepository.createUser(user);
+        try (Connection connection =
+                     DatabaseConnection.getConnection()) {
 
-        return user;
+            try {
+                connection.setAutoCommit(false);
+
+                userRepository.createUser(
+                        connection,
+                        user
+                );
+
+                if ("student".equalsIgnoreCase(role)) {
+
+                    studentRepository.createProfile(
+                            connection,
+                            user.getUserId()
+                    );
+
+                } else if ("tutor".equalsIgnoreCase(role)) {
+
+                    tutorRepository.createProfile(
+                            connection,
+                            user.getUserId()
+                    );
+                }
+
+                connection.commit();
+
+                return user;
+
+            } catch (SQLException | RuntimeException e) {
+
+                connection.rollback();
+                throw e;
+
+            } finally {
+                connection.setAutoCommit(true);
+            }
+        }
     }
 
     public User login(
             String email,
-            String password) throws SQLException {
+            String password
+    ) throws SQLException {
 
         if (email == null || email.isBlank()) {
-            throw new IllegalArgumentException("Email is required.");
+            throw new IllegalArgumentException(
+                    "Email is required."
+            );
         }
 
         if (password == null || password.isBlank()) {
-            throw new IllegalArgumentException("Password is required.");
+            throw new IllegalArgumentException(
+                    "Password is required."
+            );
         }
 
         User user = userRepository.findByEmail(email);
@@ -80,7 +130,8 @@ public class AuthService {
             String fullName,
             String email,
             String password,
-            String role) {
+            String role
+    ) {
 
         if (fullName == null || fullName.isBlank()) {
             throw new IllegalArgumentException(

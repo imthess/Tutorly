@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class UserRepository {
 
@@ -29,7 +30,10 @@ public class UserRepository {
         }
     }
 
-    public int createUser(User user) throws SQLException {
+    public int createUser(
+            Connection connection,
+            User user
+    ) throws SQLException {
 
         String sql = """
                 INSERT INTO users
@@ -37,11 +41,11 @@ public class UserRepository {
                 VALUES (?, ?, ?, ?, ?)
                 """;
 
-        try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(
-                     sql,
-                     java.sql.Statement.RETURN_GENERATED_KEYS
-             )) {
+        try (PreparedStatement statement =
+                     connection.prepareStatement(
+                             sql,
+                             Statement.RETURN_GENERATED_KEYS
+                     )) {
 
             statement.setString(1, user.getFullName());
             statement.setString(2, user.getEmail());
