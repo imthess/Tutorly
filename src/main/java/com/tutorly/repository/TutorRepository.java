@@ -10,8 +10,10 @@ import java.sql.SQLException;
 
 public class TutorRepository {
 
-    public void createProfile(Connection connection, int userId)
-            throws SQLException {
+    public void createProfile(
+            Connection connection,
+            int userId
+    ) throws SQLException {
 
         String sql = """
                 INSERT INTO tutors (user_id)
@@ -26,7 +28,58 @@ public class TutorRepository {
         }
     }
 
-    public Tutor findByUserId(int userId) throws SQLException {
+    public boolean isProfileComplete(
+            int userId
+    ) throws SQLException {
+
+        String sql = """
+                SELECT qualifications,
+                       experience,
+                       hourly_rate,
+                       bio
+                FROM tutors
+                WHERE user_id = ?
+                """;
+
+        try (Connection connection =
+                     DatabaseConnection.getConnection();
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
+
+            statement.setInt(1, userId);
+
+            try (ResultSet resultSet =
+                         statement.executeQuery()) {
+
+                if (!resultSet.next()) {
+                    return false;
+                }
+
+                String qualifications =
+                        resultSet.getString("qualifications");
+
+                int experience =
+                        resultSet.getInt("experience");
+
+                double hourlyRate =
+                        resultSet.getDouble("hourly_rate");
+
+                String bio =
+                        resultSet.getString("bio");
+
+                return qualifications != null
+                        && !qualifications.isBlank()
+                        && experience >= 0
+                        && hourlyRate > 0
+                        && bio != null
+                        && !bio.isBlank();
+            }
+        }
+    }
+
+    public Tutor findByUserId(
+            int userId
+    ) throws SQLException {
 
         String sql = """
                 SELECT
@@ -45,13 +98,15 @@ public class TutorRepository {
                 WHERE t.user_id = ?
                 """;
 
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection =
+                     DatabaseConnection.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 
             statement.setInt(1, userId);
 
-            try (ResultSet resultSet = statement.executeQuery()) {
+            try (ResultSet resultSet =
+                         statement.executeQuery()) {
 
                 if (!resultSet.next()) {
                     return null;
@@ -132,7 +187,8 @@ public class TutorRepository {
             statement.setString(4, bio);
             statement.setInt(5, userId);
 
-            int rowsUpdated = statement.executeUpdate();
+            int rowsUpdated =
+                    statement.executeUpdate();
 
             if (rowsUpdated == 0) {
                 throw new SQLException(

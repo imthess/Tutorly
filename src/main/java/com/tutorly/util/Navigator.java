@@ -6,6 +6,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.net.URL;
 
 public final class Navigator {
 
@@ -16,20 +17,29 @@ public final class Navigator {
     }
 
     public static void initialize(Stage primaryStage) {
+
         stage = primaryStage;
 
-        scene = new Scene(new javafx.scene.layout.StackPane(), 1000, 700);
+        scene = new Scene(
+                new javafx.scene.layout.StackPane(),
+                1000,
+                700
+        );
 
-        String css = Navigator.class
-                .getResource("/css/application.css")
-                .toExternalForm();
+        URL cssUrl = Navigator.class
+                .getResource("/css/application.css");
 
-        scene.getStylesheets().add(css);
+        if (cssUrl != null) {
+            scene.getStylesheets().add(cssUrl.toExternalForm());
+        } else {
+            System.err.println("WARNING: application.css not found.");
+        }
 
         stage.setScene(scene);
     }
 
     public static void navigate(String fxmlPath) {
+
         if (stage == null || scene == null) {
             throw new IllegalStateException(
                     "Navigator has not been initialized."
@@ -37,16 +47,36 @@ public final class Navigator {
         }
 
         try {
-            FXMLLoader loader = new FXMLLoader(
-                    Navigator.class.getResource(fxmlPath)
+
+            URL fxmlUrl = Navigator.class.getResource(fxmlPath);
+
+            if (fxmlUrl == null) {
+                System.err.println(
+                        "FXML file not found: " + fxmlPath
+                );
+                return;
+            }
+
+            System.out.println(
+                    "Navigating to: " + fxmlPath
             );
+
+            FXMLLoader loader = new FXMLLoader(fxmlUrl);
 
             Parent root = loader.load();
 
             scene.setRoot(root);
 
+            System.out.println(
+                    "Navigation successful: " + fxmlPath
+            );
+
         } catch (IOException | RuntimeException e) {
-            System.err.println("Failed to load: " + fxmlPath);
+
+            System.err.println(
+                    "Failed to navigate to: " + fxmlPath
+            );
+
             e.printStackTrace();
         }
     }

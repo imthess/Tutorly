@@ -1,7 +1,9 @@
 package com.tutorly.controller.student;
 
+import com.tutorly.model.User;
 import com.tutorly.util.Navigator;
 import com.tutorly.util.Session;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 
@@ -13,12 +15,20 @@ public class StudentDashboardController {
     @FXML
     private void initialize() {
 
-        if (Session.getCurrentUser() != null) {
-            welcomeLabel.setText(
-                    "Welcome, " +
-                    Session.getCurrentUser().getFullName()
+        User user = Session.getCurrentUser();
+
+        if (user == null) {
+
+            Navigator.navigate(
+                    "/fxml/login.fxml"
             );
+
+            return;
         }
+
+        welcomeLabel.setText(
+                "Welcome, " + user.getFullName()
+        );
     }
 
     @FXML
@@ -26,6 +36,8 @@ public class StudentDashboardController {
 
         Session.logout();
 
-        Navigator.navigate("/fxml/home.fxml");
+        Navigator.navigate(
+                "/fxml/home.fxml"
+        );
     }
 }

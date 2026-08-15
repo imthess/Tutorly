@@ -17,9 +17,15 @@ public class AuthService {
     private final TutorRepository tutorRepository;
 
     public AuthService() {
-        this.userRepository = new UserRepository();
-        this.studentRepository = new StudentRepository();
-        this.tutorRepository = new TutorRepository();
+
+        this.userRepository =
+                new UserRepository();
+
+        this.studentRepository =
+                new StudentRepository();
+
+        this.tutorRepository =
+                new TutorRepository();
     }
 
     public User register(
@@ -38,6 +44,7 @@ public class AuthService {
         );
 
         if (userRepository.emailExists(email)) {
+
             throw new IllegalArgumentException(
                     "An account with this email already exists."
             );
@@ -55,38 +62,61 @@ public class AuthService {
                      DatabaseConnection.getConnection()) {
 
             try {
+
                 connection.setAutoCommit(false);
 
-                userRepository.createUser(
-                        connection,
-                        user
-                );
+                /*
+                 * Step 1:
+                 * Create the main users record.
+                 */
+                int userId =
+                        userRepository.createUser(
+                                connection,
+                                user
+                        );
 
+                /*
+                 * Step 2:
+                 * Create the role-specific profile.
+                 */
                 if ("student".equalsIgnoreCase(role)) {
 
                     studentRepository.createProfile(
                             connection,
-                            user.getUserId()
+                            userId
                     );
 
                 } else if ("tutor".equalsIgnoreCase(role)) {
 
                     tutorRepository.createProfile(
                             connection,
-                            user.getUserId()
+                            userId
                     );
                 }
 
+                /*
+                 * Everything succeeded.
+                 */
                 connection.commit();
 
                 return user;
 
             } catch (SQLException | RuntimeException e) {
 
-                connection.rollback();
+                /*
+                 * Something failed.
+                 * Undo the entire signup.
+                 */
+                try {
+                    connection.rollback();
+                } catch (SQLException rollbackException) {
+                    rollbackException.printStackTrace();
+                }
+
                 throw e;
 
             } finally {
+
                 connection.setAutoCommit(true);
             }
         }
@@ -98,26 +128,31 @@ public class AuthService {
     ) throws SQLException {
 
         if (email == null || email.isBlank()) {
+
             throw new IllegalArgumentException(
                     "Email is required."
             );
         }
 
         if (password == null || password.isBlank()) {
+
             throw new IllegalArgumentException(
                     "Password is required."
             );
         }
 
-        User user = userRepository.findByEmail(email);
+        User user =
+                userRepository.findByEmail(email);
 
         if (user == null) {
+
             throw new IllegalArgumentException(
                     "Invalid email or password."
             );
         }
 
         if (!user.getPassword().equals(password)) {
+
             throw new IllegalArgumentException(
                     "Invalid email or password."
             );
@@ -134,18 +169,21 @@ public class AuthService {
     ) {
 
         if (fullName == null || fullName.isBlank()) {
+
             throw new IllegalArgumentException(
                     "Full name is required."
             );
         }
 
         if (email == null || email.isBlank()) {
+
             throw new IllegalArgumentException(
                     "Email is required."
             );
         }
 
         if (password == null || password.length() < 6) {
+
             throw new IllegalArgumentException(
                     "Password must contain at least 6 characters."
             );

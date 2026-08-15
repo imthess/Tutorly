@@ -28,7 +28,47 @@ public class StudentRepository {
         }
     }
 
-    public Student findByUserId(int userId) throws SQLException {
+    public boolean isProfileComplete(
+            int userId
+    ) throws SQLException {
+
+        String sql = """
+                SELECT education, institute
+                FROM students
+                WHERE user_id = ?
+                """;
+
+        try (Connection connection =
+                     DatabaseConnection.getConnection();
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
+
+            statement.setInt(1, userId);
+
+            try (ResultSet resultSet =
+                         statement.executeQuery()) {
+
+                if (!resultSet.next()) {
+                    return false;
+                }
+
+                String education =
+                        resultSet.getString("education");
+
+                String institute =
+                        resultSet.getString("institute");
+
+                return education != null
+                        && !education.isBlank()
+                        && institute != null
+                        && !institute.isBlank();
+            }
+        }
+    }
+
+    public Student findByUserId(
+            int userId
+    ) throws SQLException {
 
         String sql = """
                 SELECT
@@ -94,6 +134,40 @@ public class StudentRepository {
                 );
 
                 return student;
+            }
+        }
+    }
+
+    public void updateProfile(
+            int userId,
+            String education,
+            String institute
+    ) throws SQLException {
+
+        String sql = """
+                UPDATE students
+                SET education = ?,
+                    institute = ?
+                WHERE user_id = ?
+                """;
+
+        try (Connection connection =
+                     DatabaseConnection.getConnection();
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
+
+            statement.setString(1, education);
+            statement.setString(2, institute);
+            statement.setInt(3, userId);
+
+            int rowsUpdated =
+                    statement.executeUpdate();
+
+            if (rowsUpdated == 0) {
+                throw new SQLException(
+                        "No student profile exists for user ID: "
+                                + userId
+                );
             }
         }
     }

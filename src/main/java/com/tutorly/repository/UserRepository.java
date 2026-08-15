@@ -19,12 +19,16 @@ public class UserRepository {
                 WHERE email = ?
                 """;
 
-        try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connection =
+                     DatabaseConnection.getConnection();
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
 
             statement.setString(1, email);
 
-            try (ResultSet resultSet = statement.executeQuery()) {
+            try (ResultSet resultSet =
+                         statement.executeQuery()) {
+
                 return resultSet.next();
             }
         }
@@ -55,38 +59,50 @@ public class UserRepository {
 
             statement.executeUpdate();
 
-            try (ResultSet keys = statement.getGeneratedKeys()) {
+            try (ResultSet keys =
+                         statement.getGeneratedKeys()) {
 
                 if (keys.next()) {
+
                     int userId = keys.getInt(1);
+
                     user.setUserId(userId);
+
                     return userId;
                 }
             }
         }
 
-        throw new SQLException("Failed to create user.");
+        throw new SQLException(
+                "Failed to create user."
+        );
     }
 
-    public User findByEmail(String email) throws SQLException {
+    public User findByEmail(
+            String email
+    ) throws SQLException {
 
         String sql = """
-                SELECT user_id,
-                       full_name,
-                       email,
-                       password,
-                       phone,
-                       role
+                SELECT
+                    user_id,
+                    full_name,
+                    email,
+                    password,
+                    phone,
+                    role
                 FROM users
                 WHERE email = ?
                 """;
 
-        try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connection =
+                     DatabaseConnection.getConnection();
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
 
             statement.setString(1, email);
 
-            try (ResultSet resultSet = statement.executeQuery()) {
+            try (ResultSet resultSet =
+                         statement.executeQuery()) {
 
                 if (!resultSet.next()) {
                     return null;
@@ -94,12 +110,29 @@ public class UserRepository {
 
                 User user = new User();
 
-                user.setUserId(resultSet.getInt("user_id"));
-                user.setFullName(resultSet.getString("full_name"));
-                user.setEmail(resultSet.getString("email"));
-                user.setPassword(resultSet.getString("password"));
-                user.setPhone(resultSet.getString("phone"));
-                user.setRole(resultSet.getString("role"));
+                user.setUserId(
+                        resultSet.getInt("user_id")
+                );
+
+                user.setFullName(
+                        resultSet.getString("full_name")
+                );
+
+                user.setEmail(
+                        resultSet.getString("email")
+                );
+
+                user.setPassword(
+                        resultSet.getString("password")
+                );
+
+                user.setPhone(
+                        resultSet.getString("phone")
+                );
+
+                user.setRole(
+                        resultSet.getString("role")
+                );
 
                 return user;
             }

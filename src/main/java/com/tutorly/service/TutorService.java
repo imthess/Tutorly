@@ -10,89 +10,82 @@ public class TutorService {
     private final TutorRepository tutorRepository;
 
     public TutorService() {
-        tutorRepository = new TutorRepository();
+        this.tutorRepository = new TutorRepository();
     }
 
     public Tutor getTutorProfile(int userId)
             throws SQLException {
 
+        if (userId <= 0) {
+            throw new IllegalArgumentException(
+                    "Invalid user ID."
+            );
+        }
+
         return tutorRepository.findByUserId(userId);
+    }
+
+    public boolean isProfileComplete(int userId)
+            throws SQLException {
+
+        if (userId <= 0) {
+            throw new IllegalArgumentException(
+                    "Invalid user ID."
+            );
+        }
+
+        return tutorRepository.isProfileComplete(userId);
     }
 
     public void updateTutorProfile(
             int userId,
             String qualifications,
-            String experienceText,
-            String hourlyRateText,
+            int experience,
+            double hourlyRate,
             String bio
     ) throws SQLException {
 
-        if (experienceText == null || experienceText.isBlank()) {
+        if (userId <= 0) {
             throw new IllegalArgumentException(
-                    "Experience is required."
+                    "Invalid user ID."
             );
         }
 
-        if (hourlyRateText == null || hourlyRateText.isBlank()) {
+        if (qualifications == null ||
+                qualifications.isBlank()) {
+
             throw new IllegalArgumentException(
-                    "Hourly rate is required."
-            );
-        }
-
-        int experience;
-
-        double hourlyRate;
-
-        try {
-            experience = Integer.parseInt(
-                    experienceText.trim()
-            );
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(
-                    "Experience must be a whole number."
-            );
-        }
-
-        try {
-            hourlyRate = Double.parseDouble(
-                    hourlyRateText.trim()
-            );
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(
-                    "Hourly rate must be a number."
+                    "Qualifications are required."
             );
         }
 
         if (experience < 0) {
+
             throw new IllegalArgumentException(
                     "Experience cannot be negative."
             );
         }
 
-        if (hourlyRate < 0) {
+        if (hourlyRate <= 0) {
+
             throw new IllegalArgumentException(
-                    "Hourly rate cannot be negative."
+                    "Hourly rate must be greater than 0."
             );
         }
 
-        System.out.println(
-                "Updating tutor profile for user ID: " + userId
-        );
+        if (bio == null || bio.isBlank()) {
+
+            throw new IllegalArgumentException(
+                    "Bio is required."
+            );
+        }
 
         tutorRepository.updateProfile(
                 userId,
-                qualifications == null
-                        ? ""
-                        : qualifications.trim(),
+                qualifications,
                 experience,
                 hourlyRate,
-                bio == null
-                        ? ""
-                        : bio.trim()
-        );
-
-        System.out.println(
-                "Tutor profile update completed."
+                bio
         );
     }
 }
