@@ -1,8 +1,10 @@
 package com.tutorly.patterns.observer;
 
-/**
- * TODO: Implement Observer.
- */
-public class Observer {
+public interface Observer {
 
+    void update(
+            int userId,
+            String message,
+            String notificationType
+    );
 }
