@@ -1,8 +1,14 @@
 package com.tutorly.patterns.decorator;
 
 /**
- * TODO: Implement TutorProfile.
+ * Component interface for the Decorator pattern.
+ *
+ * Represents a tutor profile that can be decorated
+ * with additional features dynamically.
  */
-public class TutorProfile {
+public interface TutorProfile {
 
+    String getProfile();
+
+    double getHourlyRate();
 }

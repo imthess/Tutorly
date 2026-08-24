@@ -29,6 +29,10 @@
            text="Welcome"
            styleClass="section-title"/>
 
+    <Label fx:id="profileStatusLabel"
+           text="Tutor Profile"
+           styleClass="section-title"/>
+
     <Separator/>
 
     <Label text="Tutor Management"
@@ -45,7 +49,8 @@
             maxWidth="400"/>
 
     <Button text="Online Classes"
-            maxWidth="400"/>
+            maxWidth="400"
+            onAction="#handleOnlineClasses"/>
 
     <Button text="Learning Materials"
             maxWidth="400"/>

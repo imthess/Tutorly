@@ -3,16 +3,32 @@ package com.tutorly.patterns.singleton;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Singleton responsible for managing the application's
- * single database connection.
+ * database connection.
+ *
+ * Thread-safe implementation using an explicit mutex
+ * (ReentrantLock).
  */
 public final class DatabaseSingleton {
 
-    private static DatabaseSingleton instance;
+    private static volatile DatabaseSingleton instance;
 
     private Connection connection;
+
+    /*
+     * Mutex protecting Singleton initialization.
+     */
+    private static final ReentrantLock INSTANCE_LOCK =
+            new ReentrantLock();
+
+    /*
+     * Mutex protecting the database connection.
+     */
+    private final ReentrantLock CONNECTION_LOCK =
+            new ReentrantLock();
 
     private static final String URL =
             System.getenv().getOrDefault(
@@ -35,35 +51,92 @@ public final class DatabaseSingleton {
     private DatabaseSingleton() {
     }
 
-    public static synchronized DatabaseSingleton getInstance() {
-        if (instance == null) {
-            instance = new DatabaseSingleton();
-        }
+    /**
+     * Thread-safe Singleton access using
+     * double-checked locking and an explicit mutex.
+     */
+    public static DatabaseSingleton getInstance() {
 
-        return instance;
-    }
+        DatabaseSingleton result = instance;
 
-    public synchronized Connection getConnection() throws SQLException {
-        if (connection == null || connection.isClosed()) {
-            connection = DriverManager.getConnection(
-                    URL,
-                    USER,
-                    PASSWORD
-            );
-        }
+        if (result == null) {
 
-        return connection;
-    }
+            INSTANCE_LOCK.lock();
 
-    public synchronized void closeConnection() {
-        if (connection != null) {
             try {
-                connection.close();
-            } catch (SQLException ignored) {
-                // Connection is already being closed.
+
+                result = instance;
+
+                if (result == null) {
+
+                    result = new DatabaseSingleton();
+
+                    instance = result;
+                }
+
+            } finally {
+
+                INSTANCE_LOCK.unlock();
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns the database connection.
+     *
+     * The mutex guarantees that only one thread can
+     * create or modify the shared connection at a time.
+     */
+    public Connection getConnection() throws SQLException {
+
+        CONNECTION_LOCK.lock();
+
+        try {
+
+            if (connection == null ||
+                    connection.isClosed()) {
+
+                connection = DriverManager.getConnection(
+                        URL,
+                        USER,
+                        PASSWORD
+                );
             }
 
-            connection = null;
+            return connection;
+
+        } finally {
+
+            CONNECTION_LOCK.unlock();
+        }
+    }
+
+    /**
+     * Safely closes the database connection.
+     */
+    public void closeConnection() {
+
+        CONNECTION_LOCK.lock();
+
+        try {
+
+            if (connection != null) {
+
+                try {
+                    connection.close();
+
+                } catch (SQLException ignored) {
+                    // Connection is already being closed.
+                }
+
+                connection = null;
+            }
+
+        } finally {
+
+            CONNECTION_LOCK.unlock();
         }
     }
 }
