@@ -8,6 +8,7 @@ import com.tutorly.util.Session;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 
+
 public class OnlineClassController {
 
     @FXML
@@ -25,6 +26,7 @@ public class OnlineClassController {
     @FXML
     private Label whiteboardStatusLabel;
 
+
     private LiveClassFacade liveClassFacade;
 
     @FXML
@@ -41,8 +43,14 @@ public class OnlineClassController {
             return;
         }
 
+        String meetingUrl =
+                "https://meet.jit.si/Tutorly-Live-Class";
+
         liveClassFacade =
-                new LiveClassFacade(user);
+                new LiveClassFacade(
+                        user,
+                        meetingUrl
+                );
 
         updateStatus();
     }
@@ -52,9 +60,18 @@ public class OnlineClassController {
 
         liveClassFacade.startClass();
 
-        statusLabel.setText(
-                "Online class is running."
-        );
+        if (liveClassFacade.isClassRunning()) {
+
+            statusLabel.setText(
+                    "Online class started. Jitsi opened in browser."
+            );
+
+        } else {
+
+            statusLabel.setText(
+                    "Unable to start online class."
+            );
+        }
 
         updateStatus();
     }

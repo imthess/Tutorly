@@ -10,11 +10,15 @@ import com.tutorly.repository.BookingRepository;
 
 public class BookingService {
 
+    private final OnlineClassService onlineClassService;
     private final BookingRepository bookingRepository;
 
     private final NotificationService notificationService;
 
     public BookingService() {
+
+        this.onlineClassService =
+                new OnlineClassService();
 
         this.bookingRepository =
                 new BookingRepository();
@@ -122,10 +126,10 @@ public class BookingService {
                 "Accepted"
         );
 
-        /*
-         * Notify the student that the tutor
-         * accepted the booking.
-         */
+        onlineClassService.createClass(
+                bookingId
+        );
+
         notificationService.sendNotification(
                 booking.getStudentId(),
                 "Your booking request has been accepted.",

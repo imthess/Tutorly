@@ -1,53 +1,73 @@
 package com.tutorly.patterns.proxy;
 
+import java.awt.Desktop;
+import java.net.URI;
+
 /**
  * Real Subject of the Proxy pattern.
  *
- * Represents the actual video service.
+ * Opens the actual Jitsi meeting using the system browser.
  */
 public class RealVideoService implements VideoService {
 
+    private final String meetingUrl;
+
     private boolean running;
+
+    public RealVideoService(String meetingUrl) {
+        this.meetingUrl = meetingUrl;
+    }
 
     @Override
     public void startVideo() {
 
         if (running) {
-            System.out.println(
-                    "Video service is already running."
-            );
             return;
         }
 
-        System.out.println(
-                "Starting actual video service..."
-        );
+        try {
 
-        running = true;
+            if (!Desktop.isDesktopSupported()) {
+                System.out.println(
+                        "System browser is not supported."
+                );
+                return;
+            }
 
-        System.out.println(
-                "Video service started."
-        );
+            Desktop.getDesktop().browse(
+                    URI.create(meetingUrl)
+            );
+
+            running = true;
+
+            System.out.println(
+                    "Jitsi live class opened in browser."
+            );
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Failed to open Jitsi: "
+                            + e.getMessage()
+            );
+        }
     }
 
     @Override
     public void stopVideo() {
 
         if (!running) {
-            System.out.println(
-                    "Video service is not running."
-            );
             return;
         }
 
-        System.out.println(
-                "Stopping actual video service..."
-        );
-
         running = false;
 
+        /*
+         * We cannot force-close the user's browser tab.
+         * The user can leave the Jitsi meeting normally.
+         */
         System.out.println(
-                "Video service stopped."
+                "Jitsi live class ended."
         );
     }
 

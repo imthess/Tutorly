@@ -3,28 +3,34 @@ package com.tutorly.patterns.proxy;
 import com.tutorly.model.User;
 
 /**
- * Proxy for the video service.
+ * Proxy for the real video service.
  *
- * Controls access to the real video service based on
- * the authenticated Tutorly user.
+ * Only tutors can start a live class.
  */
 public class VideoProxy implements VideoService {
 
     private RealVideoService realVideoService;
 
     private final User user;
+    private final String meetingUrl;
 
-    public VideoProxy(User user) {
+    public VideoProxy(
+            User user,
+            String meetingUrl
+    ) {
         this.user = user;
+        this.meetingUrl = meetingUrl;
     }
 
     @Override
     public void startVideo() {
 
         if (!hasAccess()) {
+
             System.out.println(
                     "Access denied: only tutors can start video classes."
             );
+
             return;
         }
 
@@ -35,9 +41,6 @@ public class VideoProxy implements VideoService {
     public void stopVideo() {
 
         if (!hasAccess()) {
-            System.out.println(
-                    "Access denied: user cannot control the video service."
-            );
             return;
         }
 
@@ -53,24 +56,14 @@ public class VideoProxy implements VideoService {
                 && realVideoService.isRunning();
     }
 
-    /**
-     * Checks whether the current user is allowed
-     * to control the video service.
-     */
     private boolean hasAccess() {
 
-        if (user == null) {
-            return false;
-        }
-
-        return "tutor".equalsIgnoreCase(
+        return user != null
+                && "tutor".equalsIgnoreCase(
                 user.getRole()
         );
     }
 
-    /**
-     * Creates the real service only when needed.
-     */
     private RealVideoService getRealVideoService() {
 
         if (realVideoService == null) {
@@ -80,7 +73,9 @@ public class VideoProxy implements VideoService {
             );
 
             realVideoService =
-                    new RealVideoService();
+                    new RealVideoService(
+                            meetingUrl
+                    );
         }
 
         return realVideoService;
