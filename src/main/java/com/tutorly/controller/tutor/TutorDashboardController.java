@@ -19,6 +19,18 @@ public class TutorDashboardController {
     private Label welcomeLabel;
 
     @FXML
+    private Label qualificationsLabel;
+
+    @FXML
+    private Label experienceLabel;
+
+    @FXML
+    private Label hourlyRateLabel;
+
+    @FXML
+    private Label bioLabel;
+
+    @FXML
     private Label profileStatusLabel;
 
     private final TutorService tutorService =
@@ -34,16 +46,12 @@ public class TutorDashboardController {
         User user = Session.getCurrentUser();
 
         if (user == null) {
-
-            Navigator.navigate(
-                    "/fxml/login.fxml"
-            );
-
+            Navigator.navigate("/fxml/login.fxml");
             return;
         }
 
         welcomeLabel.setText(
-                "Welcome, " + user.getFullName()
+                "Welcome back, " + user.getFullName()
         );
 
         loadTutorProfile(user.getUserId());
@@ -59,21 +67,50 @@ public class TutorDashboardController {
             if (tutor == null) {
 
                 profileStatusLabel.setText(
-                        "Tutor profile not found."
+                        "Profile not found"
                 );
 
                 return;
             }
 
+            qualificationsLabel.setText(
+                    valueOrDash(tutor.getQualifications())
+            );
+
+            experienceLabel.setText(
+                    tutor.getExperience() + " years"
+            );
+
+            hourlyRateLabel.setText(
+                    String.format(
+                            "৳%.2f / hour",
+                            tutor.getHourlyRate()
+                    )
+            );
+
+            bioLabel.setText(
+                    valueOrDash(tutor.getBio())
+            );
+
+            boolean complete =
+                    tutorService.isProfileComplete(userId);
+
+            profileStatusLabel.setText(
+                    complete
+                            ? "Profile complete"
+                            : "Profile incomplete"
+            );
+
             /*
-             * Build the decorated profile through
-             * the dedicated service.
+             * Keep Decorator pattern actively integrated
+             * into the tutor dashboard.
              */
             TutorProfile profile =
                     decoratorService.buildProfile(tutor);
 
-            profileStatusLabel.setText(
-                    profile.getProfile()
+            System.out.println(
+                    "Tutor profile: "
+                            + profile.getProfile()
             );
 
         } catch (SQLException e) {
@@ -81,9 +118,46 @@ public class TutorDashboardController {
             e.printStackTrace();
 
             profileStatusLabel.setText(
-                    "Failed to load tutor profile."
+                    "Unable to load profile"
             );
         }
+    }
+
+    private String valueOrDash(String value) {
+
+        return value == null || value.isBlank()
+                ? "-"
+                : value;
+    }
+
+    @FXML
+    private void handleManageSubjects() {
+
+        System.out.println(
+                "Manage Subjects selected."
+        );
+
+        // Subject management module will be connected here.
+    }
+
+    @FXML
+    private void handleAvailability() {
+
+        System.out.println(
+                "Manage Availability selected."
+        );
+
+        // Availability module will be connected here.
+    }
+
+    @FXML
+    private void handleBookings() {
+
+        System.out.println(
+                "Booking Requests selected."
+        );
+
+        // Booking module will be connected here.
     }
 
     @FXML
@@ -91,6 +165,24 @@ public class TutorDashboardController {
 
         Navigator.navigate(
                 "/fxml/tutor/online-class.fxml"
+        );
+    }
+
+    @FXML
+    private void handleLearningMaterials() {
+
+        System.out.println(
+                "Learning Materials selected."
+        );
+
+        // Learning-material module will be connected here.
+    }
+
+    @FXML
+    private void handleEditProfile() {
+
+        Navigator.navigate(
+                "/fxml/tutor/profile-setup.fxml"
         );
     }
 

@@ -3,56 +3,213 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx/21"
-      xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.tutorly.controller.student.StudentDashboardController"
-      alignment="TOP_CENTER"
-      spacing="20"
-      prefWidth="1000"
-      prefHeight="700"
-      styleClass="root">
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.tutorly.controller.student.StudentDashboardController"
+            prefWidth="1100"
+            prefHeight="750"
+            styleClass="root">
 
-    <padding>
-        <Insets top="30"
-                right="40"
-                bottom="30"
-                left="40"/>
-    </padding>
+    <top>
 
-    <Label text="Student Dashboard"
-           styleClass="page-title"/>
+        <HBox spacing="20"
+              alignment="CENTER_LEFT"
+              styleClass="top-bar">
 
-    <Label fx:id="welcomeLabel"
-           text="Welcome"
-           styleClass="section-title"/>
+            <padding>
+                <Insets top="18"
+                        right="30"
+                        bottom="18"
+                        left="30"/>
+            </padding>
 
-    <Separator/>
+            <Label text="Tutorly"
+                   styleClass="app-title"/>
 
-    <Label text="What would you like to do?"
-           styleClass="section-title"/>
+            <Label text="Student Dashboard"
+                   styleClass="dashboard-heading"/>
 
-    <Button text="Find Tutors"
-            maxWidth="400"
-            styleClass="primary-button"/>
+            <HBox HBox.hgrow="ALWAYS"/>
 
-    <Button text="Search Subjects"
-            maxWidth="400"/>
+            <Button text="Logout"
+                    onAction="#handleLogout"
+                    styleClass="text-button"/>
 
-    <Button text="My Bookings"
-            maxWidth="400"/>
+        </HBox>
 
-    <Button text="Online Classes"
-            maxWidth="400"/>
+    </top>
 
-    <Button text="My Profile"
-            maxWidth="400"/>
+    <center>
 
-    <Separator/>
+        <ScrollPane fitToWidth="true"
+                    hbarPolicy="NEVER"
+                    styleClass="dashboard-scroll">
 
-    <Button text="Logout"
-            onAction="#handleLogout"/>
+            <VBox spacing="24"
+                  styleClass="dashboard-content">
 
-</VBox>
+                <padding>
+                    <Insets top="30"
+                            right="40"
+                            bottom="40"
+                            left="40"/>
+                </padding>
+
+                <VBox spacing="6">
+
+                    <Label fx:id="welcomeLabel"
+                           text="Welcome"
+                           styleClass="page-title"/>
+
+                    <Label text="Find tutors, manage your classes and keep your learning organized."
+                           styleClass="dashboard-subtitle"/>
+
+                </VBox>
+
+
+                <VBox spacing="8"
+                      styleClass="profile-summary-card">
+
+                    <HBox alignment="CENTER_LEFT"
+                          spacing="12">
+
+                        <Label text="My Profile"
+                               styleClass="card-title"/>
+
+                        <HBox HBox.hgrow="ALWAYS"/>
+
+                        <Label fx:id="profileStatusLabel"
+                               text="Profile status"
+                               styleClass="status-label"/>
+
+                    </HBox>
+
+                    <HBox spacing="40">
+
+                        <VBox spacing="4"
+                              HBox.hgrow="ALWAYS">
+
+                            <Label text="Education"
+                                   styleClass="field-label"/>
+
+                            <Label fx:id="educationLabel"
+                                   text="-"
+                                   styleClass="profile-value"/>
+
+                        </VBox>
+
+                        <VBox spacing="4"
+                              HBox.hgrow="ALWAYS">
+
+                            <Label text="Institute"
+                                   styleClass="field-label"/>
+
+                            <Label fx:id="instituteLabel"
+                                   text="-"
+                                   styleClass="profile-value"/>
+
+                        </VBox>
+
+                        <Button text="Edit Profile"
+                                onAction="#handleEditProfile"
+                                styleClass="secondary-button"/>
+
+                    </HBox>
+
+                </VBox>
+
+
+                <Label text="What would you like to do?"
+                       styleClass="section-title"/>
+
+
+                <HBox spacing="18"
+                      alignment="CENTER">
+
+                    <VBox spacing="12"
+                          styleClass="dashboard-card"
+                          HBox.hgrow="ALWAYS">
+
+                        <Label text="Find Tutors"
+                               styleClass="card-title"/>
+
+                        <Label text="Discover tutors based on your subjects and learning needs."
+                               wrapText="true"
+                               styleClass="card-description"/>
+
+                        <Button text="Find Tutors"
+                                onAction="#handleFindTutors"
+                                styleClass="primary-button"/>
+
+                    </VBox>
+
+
+                    <VBox spacing="12"
+                          styleClass="dashboard-card"
+                          HBox.hgrow="ALWAYS">
+
+                        <Label text="Subjects"
+                               styleClass="card-title"/>
+
+                        <Label text="Explore available subjects and find the right learning options."
+                               wrapText="true"
+                               styleClass="card-description"/>
+
+                        <Button text="Browse Subjects"
+                                onAction="#handleSearchSubjects"/>
+
+                    </VBox>
+
+                </HBox>
+
+
+                <HBox spacing="18"
+                      alignment="CENTER">
+
+                    <VBox spacing="12"
+                          styleClass="dashboard-card"
+                          HBox.hgrow="ALWAYS">
+
+                        <Label text="My Bookings"
+                               styleClass="card-title"/>
+
+                        <Label text="View and manage your tutoring sessions and booking requests."
+                               wrapText="true"
+                               styleClass="card-description"/>
+
+                        <Button text="View Bookings"
+                                onAction="#handleBookings"/>
+
+                    </VBox>
+
+
+                    <VBox spacing="12"
+                          styleClass="dashboard-card"
+                          HBox.hgrow="ALWAYS">
+
+                        <Label text="Online Classes"
+                               styleClass="card-title"/>
+
+                        <Label text="Join your scheduled online tutoring sessions."
+                               wrapText="true"
+                               styleClass="card-description"/>
+
+                        <Button text="Open Classes"
+                                onAction="#handleOnlineClasses"/>
+
+                    </VBox>
+
+                </HBox>
+
+            </VBox>
+
+        </ScrollPane>
+
+    </center>
+
+</BorderPane>

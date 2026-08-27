@@ -2,6 +2,7 @@ package com.tutorly.patterns.proxy;
 
 import java.awt.Desktop;
 import java.net.URI;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Real Subject of the Proxy pattern.
@@ -12,7 +13,7 @@ public class RealVideoService implements VideoService {
 
     private final String meetingUrl;
 
-    private boolean running;
+    private volatile boolean running;
 
     public RealVideoService(String meetingUrl) {
         this.meetingUrl = meetingUrl;
@@ -25,32 +26,41 @@ public class RealVideoService implements VideoService {
             return;
         }
 
-        try {
+        running = true;
 
-            if (!Desktop.isDesktopSupported()) {
-                System.out.println(
-                        "System browser is not supported."
+        CompletableFuture.runAsync(() -> {
+
+            try {
+
+                if (!Desktop.isDesktopSupported()) {
+
+                    System.out.println(
+                            "System browser is not supported."
+                    );
+
+                    running = false;
+                    return;
+                }
+
+                Desktop.getDesktop().browse(
+                        URI.create(meetingUrl)
                 );
-                return;
+
+                System.out.println(
+                        "Jitsi live class opened in browser."
+                );
+
+            } catch (Exception e) {
+
+                running = false;
+
+                System.out.println(
+                        "Failed to open Jitsi: "
+                                + e.getMessage()
+                );
             }
 
-            Desktop.getDesktop().browse(
-                    URI.create(meetingUrl)
-            );
-
-            running = true;
-
-            System.out.println(
-                    "Jitsi live class opened in browser."
-            );
-
-        } catch (Exception e) {
-
-            System.out.println(
-                    "Failed to open Jitsi: "
-                            + e.getMessage()
-            );
-        }
+        });
     }
 
     @Override
@@ -62,12 +72,8 @@ public class RealVideoService implements VideoService {
 
         running = false;
 
-        /*
-         * We cannot force-close the user's browser tab.
-         * The user can leave the Jitsi meeting normally.
-         */
         System.out.println(
-                "Jitsi live class ended."
+                "Jitsi live class stopped."
         );
     }
 
