@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.tutorly.controller.student.StudentDashboardController"
+      spacing="18"
+      prefWidth="1100"
+      prefHeight="750"
+      styleClass="root">
+
+    <padding>
+        <Insets top="25"
+                right="35"
+                bottom="30"
+                left="35"/>
+    </padding>
+
+    <HBox spacing="15"
+          alignment="CENTER_LEFT"
+          styleClass="top-bar">
+
+        <VBox HBox.hgrow="ALWAYS">
+
+            <Label text="Tutorly"
+                   styleClass="app-title"/>
+
+            <Label fx:id="welcomeLabel"
+                   text="Welcome"/>
+
+        </VBox>
+
+        <Button text="Logout"
+                onAction="#handleLogout"
+                styleClass="text-button"/>
+
+    </HBox>
+
+    <Label text="Student Dashboard"
+           styleClass="page-title"/>
+
+    <Separator/>
+
+    <GridPane hgap="18"
+              vgap="18">
+
+        <VBox styleClass="dashboard-card"
+              GridPane.columnIndex="0"
+              GridPane.rowIndex="0">
+
+            <Label text="Find a Tutor"
+                   styleClass="card-title"/>
+
+            <Label text="Browse tutors, subjects, rates and available teaching times."/>
+
+            <Button text="Find Tutors"
+                    onAction="#handleFindTutors"
+                    styleClass="primary-button"/>
+
+        </VBox>
+
+        <VBox styleClass="dashboard-card"
+              GridPane.columnIndex="1"
+              GridPane.rowIndex="0">
+
+            <Label text="My Bookings"
+                   styleClass="card-title"/>
+
+            <Label text="Track requests, accepted bookings and your enrolled tutors."/>
+
+            <Button text="View Bookings"
+                    onAction="#handleBookings"
+                    styleClass="secondary-button"/>
+
+        </VBox>
+
+        <VBox styleClass="dashboard-card"
+              GridPane.columnIndex="0"
+              GridPane.rowIndex="1">
+
+            <Label text="Online Classes"
+                   styleClass="card-title"/>
+
+            <Label text="Open your scheduled online tutoring sessions."/>
+
+            <Button text="Online Classes"
+                    onAction="#handleOnlineClasses"
+                    styleClass="primary-button"/>
+
+        </VBox>
+
+        <VBox styleClass="dashboard-card"
+              GridPane.columnIndex="1"
+              GridPane.rowIndex="1">
+
+            <Label text="My Profile"
+                   styleClass="card-title"/>
+
+            <Label text="Update your education and institute information."/>
+
+            <Button text="Profile"
+                    onAction="#handleProfile"
+                    styleClass="secondary-button"/>
+
+        </VBox>
+
+    </GridPane>
+
+</VBox>

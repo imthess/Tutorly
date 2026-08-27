@@ -3,32 +3,8 @@ package com.tutorly.patterns.singleton;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.concurrent.locks.ReentrantLock;
 
-/**
- * Singleton responsible for managing the application's
- * database connection.
- *
- * Thread-safe implementation using an explicit mutex
- * (ReentrantLock).
- */
 public final class DatabaseSingleton {
-
-    private static volatile DatabaseSingleton instance;
-
-    private Connection connection;
-
-    /*
-     * Mutex protecting Singleton initialization.
-     */
-    private static final ReentrantLock INSTANCE_LOCK =
-            new ReentrantLock();
-
-    /*
-     * Mutex protecting the database connection.
-     */
-    private final ReentrantLock CONNECTION_LOCK =
-            new ReentrantLock();
 
     private static final String URL =
             System.getenv().getOrDefault(
@@ -48,95 +24,42 @@ public final class DatabaseSingleton {
                     ""
             );
 
+    private final ThreadLocal<Connection> threadLocalConnection = new ThreadLocal<>();
+
     private DatabaseSingleton() {
     }
 
-    /**
-     * Thread-safe Singleton access using
-     * double-checked locking and an explicit mutex.
-     */
+    private static class InstanceHolder {
+        private static final DatabaseSingleton INSTANCE = new DatabaseSingleton();
+    }
+
     public static DatabaseSingleton getInstance() {
-
-        DatabaseSingleton result = instance;
-
-        if (result == null) {
-
-            INSTANCE_LOCK.lock();
-
-            try {
-
-                result = instance;
-
-                if (result == null) {
-
-                    result = new DatabaseSingleton();
-
-                    instance = result;
-                }
-
-            } finally {
-
-                INSTANCE_LOCK.unlock();
-            }
-        }
-
-        return result;
+        return InstanceHolder.INSTANCE;
     }
 
-    /**
-     * Returns the database connection.
-     *
-     * The mutex guarantees that only one thread can
-     * create or modify the shared connection at a time.
-     */
     public Connection getConnection() throws SQLException {
+        Connection connection = threadLocalConnection.get();
 
-        CONNECTION_LOCK.lock();
-
-        try {
-
-            if (connection == null ||
-                    connection.isClosed()) {
-
-                connection = DriverManager.getConnection(
-                        URL,
-                        USER,
-                        PASSWORD
-                );
-            }
-
-            return connection;
-
-        } finally {
-
-            CONNECTION_LOCK.unlock();
+        if (connection == null || connection.isClosed()) {
+            connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            threadLocalConnection.set(connection);
         }
+
+        return connection;
     }
 
-    /**
-     * Safely closes the database connection.
-     */
     public void closeConnection() {
+        Connection connection = threadLocalConnection.get();
 
-        CONNECTION_LOCK.lock();
-
-        try {
-
-            if (connection != null) {
-
-                try {
+        if (connection != null) {
+            try {
+                if (!connection.isClosed()) {
                     connection.close();
-
-                } catch (SQLException ignored) {
-                    // Connection is already being closed.
                 }
-
-                connection = null;
+            } catch (SQLException ignored) {
+            } finally {
+                threadLocalConnection.remove();
             }
-
-        } finally {
-
-            CONNECTION_LOCK.unlock();
         }
     }
 }

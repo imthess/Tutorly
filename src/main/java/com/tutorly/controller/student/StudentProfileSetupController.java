@@ -7,8 +7,7 @@ import com.tutorly.util.Navigator;
 import com.tutorly.util.Session;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 
 import java.sql.SQLException;
 
@@ -16,6 +15,9 @@ public class StudentProfileSetupController {
 
     @FXML
     private Label welcomeLabel;
+
+    @FXML
+    private Label titleLabel;
 
     @FXML
     private TextField educationField;
@@ -32,9 +34,14 @@ public class StudentProfileSetupController {
     @FXML
     private void initialize() {
 
-        User user = Session.getCurrentUser();
+        User user =
+                Session.getCurrentUser();
 
-        if (user == null) {
+        if (user == null ||
+                !"student".equalsIgnoreCase(
+                        user.getRole()
+                )) {
+
             Navigator.navigate("/fxml/login.fxml");
             return;
         }
@@ -42,42 +49,92 @@ public class StudentProfileSetupController {
         welcomeLabel.setText(
                 "Welcome, " + user.getFullName()
         );
+
+        loadExistingProfile(
+                user.getUserId()
+        );
     }
 
+    private void loadExistingProfile(
+            int userId
+    ) {
+
+        try {
+
+            Student student =
+                    studentService.getStudentProfile(
+                            userId
+                    );
+
+            if (student == null) {
+                return;
+            }
+
+            educationField.setText(
+                    safe(student.getEducation())
+            );
+
+            instituteField.setText(
+                    safe(student.getInstitute())
+            );
+
+            titleLabel.setText(
+                    "Edit Student Profile"
+            );
+
+        } catch (SQLException e) {
+
+            messageLabel.setText(
+                    "Unable to load your profile."
+            );
+        }
+    }
+
+    private String safe(String value) {
+
+        return value == null
+                ? ""
+                : value;
+    }
 
     @FXML
     private void handleSaveProfile() {
 
-        User user = Session.getCurrentUser();
+        User user =
+                Session.getCurrentUser();
 
         if (user == null) {
             Navigator.navigate("/fxml/login.fxml");
             return;
         }
 
-        String education =
-                educationField.getText().trim();
-
-        String institute =
-                instituteField.getText().trim();
-
         try {
 
             studentService.updateStudentProfile(
                     user.getUserId(),
-                    education,
-                    institute
+                    educationField.getText().trim(),
+                    instituteField.getText().trim()
             );
 
-            Navigator.navigate(
-                    "/fxml/student/dashboard.fxml"
+            messageLabel.setText(
+                    "Profile saved successfully."
             );
 
         } catch (SQLException |
                  IllegalArgumentException e) {
 
-            messageLabel.setText(e.getMessage());
+            messageLabel.setText(
+                    e.getMessage()
+            );
         }
+    }
+
+    @FXML
+    private void handleBack() {
+
+        Navigator.navigate(
+                "/fxml/student/dashboard.fxml"
+        );
     }
 
     @FXML
@@ -85,6 +142,8 @@ public class StudentProfileSetupController {
 
         Session.logout();
 
-        Navigator.navigate("/fxml/home.fxml");
+        Navigator.navigate(
+                "/fxml/home.fxml"
+        );
     }
 }

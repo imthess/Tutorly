@@ -17,13 +17,10 @@ public class StudentDashboardController {
     private Label welcomeLabel;
 
     @FXML
-    private Label educationLabel;
+    private Label profileSummaryLabel;
 
     @FXML
-    private Label instituteLabel;
-
-    @FXML
-    private Label profileStatusLabel;
+    private Label bookingSummaryLabel;
 
     private final StudentService studentService =
             new StudentService();
@@ -31,116 +28,76 @@ public class StudentDashboardController {
     @FXML
     private void initialize() {
 
-        User user = Session.getCurrentUser();
+        User user =
+                Session.getCurrentUser();
 
-        if (user == null) {
+        if (user == null ||
+                !"student".equalsIgnoreCase(
+                        user.getRole()
+                )) {
+
             Navigator.navigate("/fxml/login.fxml");
             return;
         }
 
         welcomeLabel.setText(
-                "Welcome back, " + user.getFullName()
+                "Welcome, " + user.getFullName()
         );
 
-        loadStudentProfile(user.getUserId());
+        loadProfile(user.getUserId());
     }
 
-    private void loadStudentProfile(int userId) {
+    private void loadProfile(int userId) {
 
         try {
 
             Student student =
-                    studentService.getStudentProfile(userId);
+                    studentService.getStudentProfile(
+                            userId
+                    );
 
             if (student == null) {
 
-                profileStatusLabel.setText(
-                        "Profile not found"
+                profileSummaryLabel.setText(
+                        "Profile information unavailable."
                 );
-
-                educationLabel.setText("-");
-                instituteLabel.setText("-");
 
                 return;
             }
 
-            educationLabel.setText(
-                    valueOrDash(student.getEducation())
-            );
-
-            instituteLabel.setText(
-                    valueOrDash(student.getInstitute())
-            );
-
-            boolean complete =
-                    studentService.isProfileComplete(userId);
-
-            profileStatusLabel.setText(
-                    complete
-                            ? "Profile complete"
-                            : "Profile incomplete"
+            profileSummaryLabel.setText(
+                    "Education: "
+                            + safe(student.getEducation())
+                            + "\nInstitute: "
+                            + safe(student.getInstitute())
             );
 
         } catch (SQLException e) {
 
-            e.printStackTrace();
-
-            profileStatusLabel.setText(
-                    "Unable to load profile"
+            profileSummaryLabel.setText(
+                    "Unable to load profile information."
             );
         }
     }
 
-    private String valueOrDash(String value) {
+    private String safe(String value) {
 
-        return value == null || value.isBlank()
-                ? "-"
+        return value == null ||
+                value.isBlank()
+                ? "Not provided"
                 : value;
     }
 
     @FXML
     private void handleFindTutors() {
 
-        System.out.println(
-                "Find Tutors selected."
+        Navigator.navigate(
+                "/fxml/student/find-tutors.fxml"
         );
-
-        // Tutor search module will be connected here.
     }
 
     @FXML
-    private void handleSearchSubjects() {
-
-        System.out.println(
-                "Search Subjects selected."
-        );
-
-        // Subject search module will be connected here.
-    }
-
-    @FXML
-    private void handleBookings() {
-
-        System.out.println(
-                "My Bookings selected."
-        );
-
-        // Booking module will be connected here.
-    }
-
-    @FXML
-    private void handleOnlineClasses() {
-
-        System.out.println(
-                "Online Classes selected."
-        );
-
-        // Student online-class access will be connected
-        // to the booking/class module.
-    }
-
-    @FXML
-    private void handleEditProfile() {
+    private void handleProfile() {
 
         Navigator.navigate(
                 "/fxml/student/profile-setup.fxml"

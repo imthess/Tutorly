@@ -24,8 +24,8 @@ public class Booking {
             int subjectId,
             LocalDate bookingDate,
             LocalTime bookingTime,
-            int duration) {
-
+            int duration
+    ) {
         this.studentId = studentId;
         this.tutorId = tutorId;
         this.subjectId = subjectId;
@@ -43,8 +43,8 @@ public class Booking {
             LocalDate bookingDate,
             LocalTime bookingTime,
             int duration,
-            String status) {
-
+            String status
+    ) {
         this.bookingId = bookingId;
         this.studentId = studentId;
         this.tutorId = tutorId;

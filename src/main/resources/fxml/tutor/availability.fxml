@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.tutorly.controller.tutor.AvailabilityController"
+            styleClass="root">
+
+    <top>
+        <HBox spacing="15"
+              alignment="CENTER_LEFT"
+              styleClass="top-bar">
+            <padding>
+                <Insets top="18"
+                        right="30"
+                        bottom="18"
+                        left="30"/>
+            </padding>
+
+            <Button text="← Back"
+                    onAction="#handleBack"
+                    styleClass="text-button"/>
+
+            <Label text="Manage Availability"
+                   styleClass="app-title"/>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox spacing="22">
+            <padding>
+                <Insets top="30"
+                        right="40"
+                        bottom="30"
+                        left="40"/>
+            </padding>
+
+            <Label text="Set your teaching schedule"
+                   styleClass="page-title"/>
+
+            <HBox spacing="12">
+
+                <ComboBox fx:id="dayComboBox"
+                          promptText="Day"
+                          prefWidth="150"/>
+
+                <ComboBox fx:id="startComboBox"
+                          promptText="Start"
+                          prefWidth="130"/>
+
+                <ComboBox fx:id="endComboBox"
+                          promptText="End"
+                          prefWidth="130"/>
+
+                <Button text="Add"
+                        onAction="#handleAddAvailability"
+                        styleClass="secondary-button"/>
+            </HBox>
+
+            <Label fx:id="messageLabel"/>
+
+            <TableView fx:id="availabilityTable"
+                       VBox.vgrow="ALWAYS">
+
+                <columns>
+
+                    <TableColumn fx:id="dayColumn"
+                                 text="Day"
+                                 prefWidth="180"/>
+
+                    <TableColumn fx:id="startColumn"
+                                 text="Start"
+                                 prefWidth="150"/>
+
+                    <TableColumn fx:id="endColumn"
+                                 text="End"
+                                 prefWidth="150"/>
+
+                    <TableColumn fx:id="statusColumn"
+                                 text="Status"
+                                 prefWidth="150"/>
+
+                </columns>
+
+            </TableView>
+
+            <HBox spacing="12">
+
+                <Button text="Enable / Disable"
+                        onAction="#handleToggleAvailability"/>
+
+                <Button text="Delete"
+                        onAction="#handleDeleteAvailability"/>
+
+            </HBox>
+
+        </VBox>
+    </center>
+
+</BorderPane>

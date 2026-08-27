@@ -24,8 +24,7 @@ public class TutorDashboardController {
     private final TutorService tutorService =
             new TutorService();
 
-    private final TutorProfileDecoratorService
-            decoratorService =
+    private final TutorProfileDecoratorService decoratorService =
             new TutorProfileDecoratorService();
 
     @FXML
@@ -34,12 +33,12 @@ public class TutorDashboardController {
         User user =
                 Session.getCurrentUser();
 
-        if (user == null ||
-                !"tutor".equalsIgnoreCase(
-                        user.getRole()
-                )) {
+        if (user == null) {
 
-            Navigator.navigate("/fxml/login.fxml");
+            Navigator.navigate(
+                    "/fxml/login.fxml"
+            );
+
             return;
         }
 
@@ -83,17 +82,19 @@ public class TutorDashboardController {
 
         } catch (SQLException e) {
 
+            e.printStackTrace();
+
             profileStatusLabel.setText(
-                    "Unable to load tutor profile."
+                    "Failed to load tutor profile."
             );
         }
     }
 
     @FXML
-    private void handleAvailability() {
+    private void handleBookingRequests() {
 
         Navigator.navigate(
-                "/fxml/tutor/availability.fxml"
+                "/fxml/tutor/booking-requests.fxml"
         );
     }
 

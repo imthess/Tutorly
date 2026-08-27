@@ -1,0 +1,297 @@
+.root {
+    -fx-font-family: "Ubuntu";
+    -fx-background-color: #f7f8fa;
+}
+
+.navbar {
+    -fx-background-color: white;
+    -fx-padding: 15 30 15 30;
+}
+
+.logo {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+}
+
+.hero-title {
+    -fx-font-size: 40px;
+    -fx-font-weight: bold;
+}
+
+.hero-subtitle {
+    -fx-font-size: 18px;
+}
+
+.feature-text {
+    -fx-font-size: 15px;
+}
+
+.page-title {
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+}
+
+.button {
+    -fx-cursor: hand;
+}
+
+.primary-button {
+    -fx-padding: 10 22 10 22;
+    -fx-font-weight: bold;
+}
+
+.secondary-button {
+    -fx-padding: 10 22 10 22;
+}
+
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-padding: 8 15 8 15;
+}
+
+.text-button {
+    -fx-background-color: transparent;
+}
+
+.footer {
+    -fx-padding: 15;
+    -fx-alignment: center;
+}
+
+/* Dashboard */
+
+.top-bar {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 0 0 1 0;
+}
+
+.app-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+.dashboard-card {
+    -fx-background-color: #ffffff;
+    -fx-padding: 20px;
+    -fx-min-width: 400px;
+    -fx-min-height: 150px;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.card-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.primary-button {
+    -fx-padding: 8px 18px;
+}
+
+.text-button {
+    -fx-padding: 8px 15px;
+}
+
+
+/* =========================================================
+   Tutorly Dashboard UI
+   ========================================================= */
+
+.dashboard-heading {
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+}
+
+.dashboard-subtitle {
+    -fx-font-size: 15px;
+    -fx-text-fill: #6b7280;
+}
+
+.dashboard-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.dashboard-scroll > .viewport {
+    -fx-background-color: #f7f8fa;
+}
+
+.dashboard-content {
+    -fx-background-color: #f7f8fa;
+}
+
+.section-title {
+    -fx-font-size: 21px;
+    -fx-font-weight: bold;
+}
+
+.profile-summary-card {
+    -fx-background-color: #ffffff;
+    -fx-padding: 22px;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+}
+
+.dashboard-card {
+    -fx-background-color: #ffffff;
+    -fx-padding: 22px;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-min-height: 175px;
+}
+
+.dashboard-card:hover {
+    -fx-border-color: #cbd5e1;
+    -fx-translate-y: -2px;
+}
+
+.card-title {
+    -fx-font-size: 19px;
+    -fx-font-weight: bold;
+}
+
+.card-description {
+    -fx-font-size: 14px;
+    -fx-text-fill: #6b7280;
+}
+
+.field-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #4b5563;
+}
+
+.profile-value {
+    -fx-font-size: 15px;
+}
+
+.status-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.form-card {
+    -fx-background-color: #ffffff;
+    -fx-padding: 30px;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+}
+
+.error-label {
+    -fx-text-fill: #dc2626;
+    -fx-font-size: 13px;
+}
+
+.text-field,
+.text-area {
+    -fx-background-radius: 7px;
+    -fx-border-radius: 7px;
+    -fx-border-color: #d1d5db;
+    -fx-padding: 10px;
+}
+
+.text-field:focused,
+.text-area:focused {
+    -fx-border-color: #64748b;
+}
+
+.primary-button {
+    -fx-padding: 10px 20px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.secondary-button {
+    -fx-padding: 9px 17px;
+    -fx-cursor: hand;
+}
+
+.button {
+    -fx-cursor: hand;
+}
+
+
+/* ============================================================
+   BOOKING / DASHBOARD UI
+   ============================================================ */
+
+.section-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #4b5563;
+}
+
+.dashboard-card {
+    -fx-background-color: #ffffff;
+    -fx-padding: 22px;
+    -fx-min-width: 420px;
+    -fx-min-height: 150px;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-spacing: 12px;
+}
+
+.dashboard-card:hover {
+    -fx-border-color: #c7d2fe;
+    -fx-effect: dropshadow(
+        gaussian,
+        rgba(0,0,0,0.08),
+        12,
+        0,
+        0,
+        4
+    );
+}
+
+.table-view {
+    -fx-background-color: white;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #f3f4f6;
+}
+
+.table-view .column-header,
+.table-view .filler {
+    -fx-background-color: transparent;
+}
+
+.table-row-cell {
+    -fx-cell-size: 42px;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #e0e7ff;
+    -fx-text-background-color: #111827;
+}
+
+.combo-box,
+.date-picker,
+.text-field,
+.text-area {
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+}
+
+.button {
+    -fx-background-radius: 8px;
+}
+
+.primary-button {
+    -fx-padding: 10px 20px;
+    -fx-font-weight: bold;
+}
+
+.secondary-button {
+    -fx-padding: 10px 20px;
+}

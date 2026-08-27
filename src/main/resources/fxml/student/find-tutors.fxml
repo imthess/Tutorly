@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.tutorly.controller.student.FindTutorsController"
+            styleClass="root">
+
+    <top>
+
+        <HBox spacing="15"
+              alignment="CENTER_LEFT"
+              styleClass="top-bar">
+
+            <padding>
+                <Insets top="18"
+                        right="30"
+                        bottom="18"
+                        left="30"/>
+            </padding>
+
+            <Button text="← Back"
+                    onAction="#handleBack"
+                    styleClass="text-button"/>
+
+            <Label text="Find Tutors"
+                   styleClass="app-title"/>
+
+        </HBox>
+
+    </top>
+
+    <center>
+
+        <VBox spacing="18">
+
+            <padding>
+                <Insets top="30"
+                        right="40"
+                        bottom="30"
+                        left="40"/>
+            </padding>
+
+            <Label text="Find the right tutor"
+                   styleClass="page-title"/>
+
+            <HBox spacing="12">
+
+                <TextField fx:id="subjectField"
+                           promptText="Search by subject"
+                           HBox.hgrow="ALWAYS"/>
+
+                <Button text="Search"
+                        onAction="#handleSearch"
+                        styleClass="primary-button"/>
+
+            </HBox>
+
+            <SplitPane dividerPositions="0.35">
+
+                <ListView fx:id="tutorList"
+                          onMouseClicked="#handleTutorSelected"/>
+
+                <ScrollPane fitToWidth="true">
+
+                    <VBox spacing="15">
+
+                        <padding>
+                            <Insets top="20"
+                                    right="20"
+                                    bottom="20"
+                                    left="20"/>
+                        </padding>
+
+                        <Label text="Tutor Details"
+                               styleClass="card-title"/>
+
+                        <Label fx:id="detailsLabel"
+                               text="Select a tutor to view details."
+                               wrapText="true"/>
+
+                        <Button text="Book This Tutor"
+                                onAction="#handleBookTutor"
+                                styleClass="primary-button"/>
+
+                        <Label fx:id="messageLabel"
+                               wrapText="true"/>
+
+                    </VBox>
+
+                </ScrollPane>
+
+            </SplitPane>
+
+        </VBox>
+
+    </center>
+
+</BorderPane>

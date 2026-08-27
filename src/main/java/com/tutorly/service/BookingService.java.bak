@@ -1,22 +1,18 @@
 package com.tutorly.service;
 
-import com.tutorly.model.Booking;
-import com.tutorly.model.BookingDetails;
-import com.tutorly.repository.AvailabilityRepository;
-import com.tutorly.repository.BookingRepository;
-
-import java.sql.Date;
 import java.sql.SQLException;
-import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+
+import com.tutorly.model.Booking;
+import com.tutorly.repository.BookingRepository;
 
 public class BookingService {
 
     private final OnlineClassService onlineClassService;
     private final BookingRepository bookingRepository;
-    private final AvailabilityRepository availabilityRepository;
+
     private final NotificationService notificationService;
 
     public BookingService() {
@@ -26,9 +22,6 @@ public class BookingService {
 
         this.bookingRepository =
                 new BookingRepository();
-
-        this.availabilityRepository =
-                new AvailabilityRepository();
 
         this.notificationService =
                 new NotificationService();
@@ -52,52 +45,25 @@ public class BookingService {
                 duration
         );
 
-        if (!availabilityRepository.isAvailable(
+        Booking booking = new Booking(
+                studentId,
                 tutorId,
+                subjectId,
                 bookingDate,
                 bookingTime,
                 duration
-        )) {
-
-            throw new IllegalArgumentException(
-                    "The tutor is not available at the selected date and time."
-            );
-        }
-
-        boolean overlapping =
-                bookingRepository.hasOverlappingBooking(
-                        tutorId,
-                        Date.valueOf(bookingDate),
-                        Time.valueOf(bookingTime),
-                        duration
-                );
-
-        if (overlapping) {
-
-            throw new IllegalArgumentException(
-                    "The selected time overlaps with another booking."
-            );
-        }
-
-        Booking booking =
-                new Booking(
-                        studentId,
-                        tutorId,
-                        subjectId,
-                        bookingDate,
-                        bookingTime,
-                        duration
-                );
+        );
 
         bookingRepository.createBooking(booking);
 
-        int tutorUserId =
-                bookingRepository.findTutorUserId(
-                        tutorId
-                );
-
+        /*
+         * Observer Pattern:
+         *
+         * After the booking is successfully created,
+         * notify the tutor.
+         */
         notificationService.sendNotification(
-                tutorUserId,
+                tutorId,
                 "You have received a new booking request.",
                 "Booking"
         );
@@ -105,7 +71,20 @@ public class BookingService {
         return booking;
     }
 
-    public List<BookingDetails> getStudentBookingDetails(
+    public Booking getBookingById(
+            int bookingId
+    ) throws SQLException {
+
+        if (bookingId <= 0) {
+            throw new IllegalArgumentException(
+                    "Invalid booking ID."
+            );
+        }
+
+        return bookingRepository.findById(bookingId);
+    }
+
+    public List<Booking> getStudentBookings(
             int studentId
     ) throws SQLException {
 
@@ -114,30 +93,6 @@ public class BookingService {
                     "Invalid student ID."
             );
         }
-
-        return bookingRepository.findStudentBookingDetails(
-                studentId
-        );
-    }
-
-    public List<BookingDetails> getTutorBookingDetails(
-            int tutorId
-    ) throws SQLException {
-
-        if (tutorId <= 0) {
-            throw new IllegalArgumentException(
-                    "Invalid tutor ID."
-            );
-        }
-
-        return bookingRepository.findTutorBookingDetails(
-                tutorId
-        );
-    }
-
-    public List<Booking> getStudentBookings(
-            int studentId
-    ) throws SQLException {
 
         return bookingRepository.findByStudentId(
                 studentId
@@ -148,16 +103,15 @@ public class BookingService {
             int tutorId
     ) throws SQLException {
 
+        if (tutorId <= 0) {
+            throw new IllegalArgumentException(
+                    "Invalid tutor ID."
+            );
+        }
+
         return bookingRepository.findByTutorId(
-                tutorId
+                int tutorId
         );
-    }
-
-    public Booking getBookingById(
-            int bookingId
-    ) throws SQLException {
-
-        return getExistingBooking(bookingId);
     }
 
     public void acceptBooking(
@@ -167,42 +121,17 @@ public class BookingService {
         Booking booking =
                 getExistingBooking(bookingId);
 
-        if (!"Pending".equalsIgnoreCase(
-                booking.getStatus())) {
-
-            throw new IllegalArgumentException(
-                    "Only pending bookings can be accepted."
-            );
-        }
-
         bookingRepository.updateStatus(
                 bookingId,
                 "Accepted"
         );
 
-        try {
-
-            onlineClassService.createClass(
-                    bookingId
-            );
-
-        } catch (SQLException e) {
-
-            bookingRepository.updateStatus(
-                    bookingId,
-                    "Pending"
-            );
-
-            throw e;
-        }
-
-        int studentUserId =
-                bookingRepository.findStudentUserId(
-                        booking.getStudentId()
-                );
+        onlineClassService.createClass(
+                bookingId
+        );
 
         notificationService.sendNotification(
-                studentUserId,
+                booking.getStudentId(),
                 "Your booking request has been accepted.",
                 "Booking"
         );
@@ -215,26 +144,17 @@ public class BookingService {
         Booking booking =
                 getExistingBooking(bookingId);
 
-        if (!"Pending".equalsIgnoreCase(
-                booking.getStatus())) {
-
-            throw new IllegalArgumentException(
-                    "Only pending bookings can be rejected."
-            );
-        }
-
         bookingRepository.updateStatus(
                 bookingId,
                 "Rejected"
         );
 
-        int studentUserId =
-                bookingRepository.findStudentUserId(
-                        booking.getStudentId()
-                );
-
+        /*
+         * Notify the student that the tutor
+         * rejected the booking.
+         */
         notificationService.sendNotification(
-                studentUserId,
+                booking.getStudentId(),
                 "Your booking request has been rejected.",
                 "Booking"
         );
@@ -247,26 +167,13 @@ public class BookingService {
         Booking booking =
                 getExistingBooking(bookingId);
 
-        if (!"Accepted".equalsIgnoreCase(
-                booking.getStatus())) {
-
-            throw new IllegalArgumentException(
-                    "Only accepted bookings can be completed."
-            );
-        }
-
         bookingRepository.updateStatus(
                 bookingId,
                 "Completed"
         );
 
-        int studentUserId =
-                bookingRepository.findStudentUserId(
-                        booking.getStudentId()
-                );
-
         notificationService.sendNotification(
-                studentUserId,
+                booking.getStudentId(),
                 "Your booking has been completed.",
                 "Booking"
         );
@@ -279,35 +186,14 @@ public class BookingService {
         Booking booking =
                 getExistingBooking(bookingId);
 
-        if ("Completed".equalsIgnoreCase(
-                booking.getStatus())) {
-
-            throw new IllegalArgumentException(
-                    "Completed bookings cannot be cancelled."
-            );
-        }
-
-        if ("Cancelled".equalsIgnoreCase(
-                booking.getStatus())) {
-
-            throw new IllegalArgumentException(
-                    "Booking is already cancelled."
-            );
-        }
-
         bookingRepository.updateStatus(
                 bookingId,
                 "Cancelled"
         );
 
-        int tutorUserId =
-                bookingRepository.findTutorUserId(
-                        booking.getTutorId()
-                );
-
         notificationService.sendNotification(
-                tutorUserId,
-                "A booking has been cancelled.",
+                booking.getStudentId(),
+                "Your booking has been cancelled.",
                 "Booking"
         );
     }
@@ -334,12 +220,9 @@ public class BookingService {
         }
 
         Booking booking =
-                bookingRepository.findById(
-                        bookingId
-                );
+                bookingRepository.findById(bookingId);
 
         if (booking == null) {
-
             throw new IllegalArgumentException(
                     "Booking not found."
             );
@@ -396,15 +279,6 @@ public class BookingService {
         if (bookingDate.isBefore(LocalDate.now())) {
             throw new IllegalArgumentException(
                     "Booking date cannot be in the past."
-            );
-        }
-
-        LocalTime endTime =
-                bookingTime.plusMinutes(duration);
-
-        if (endTime.isBefore(bookingTime)) {
-            throw new IllegalArgumentException(
-                    "Booking cannot cross midnight."
             );
         }
     }
