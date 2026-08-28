@@ -3,8 +3,6 @@ package com.tutorly.patterns.facade;
 import com.tutorly.model.User;
 import com.tutorly.patterns.proxy.VideoProxy;
 
-import java.util.function.Consumer;
-
 /**
  * Facade for managing an online live class.
  */
