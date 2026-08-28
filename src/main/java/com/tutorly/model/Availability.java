@@ -6,6 +6,8 @@ public class Availability {
 
     private int availabilityId;
     private int tutorId;
+    private int subjectId;
+    private String subjectName;
     private String dayOfWeek;
     private LocalTime startTime;
     private LocalTime endTime;
@@ -29,6 +31,22 @@ public class Availability {
 
     public void setTutorId(int tutorId) {
         this.tutorId = tutorId;
+    }
+
+    public int getSubjectId() {
+        return subjectId;
+    }
+
+    public void setSubjectId(int subjectId) {
+        this.subjectId = subjectId;
+    }
+
+    public String getSubjectName() {
+        return subjectName;
+    }
+
+    public void setSubjectName(String subjectName) {
+        this.subjectName = subjectName;
     }
 
     public String getDayOfWeek() {

@@ -8,47 +8,44 @@ import java.util.List;
 
 public class TutorSubjectRepository {
 
-    public List<String> findSubjectsByTutorId(
-            int tutorId
-    ) throws SQLException {
-
-        String sql = """
-                SELECT s.subject_name
-                FROM tutor_subjects ts
-                JOIN subjects s
-                    ON ts.subject_id = s.subject_id
-                WHERE ts.tutor_id = ?
-                ORDER BY s.subject_name
-                """;
+    public List<String> findSubjectsByTutorId(int tutorId) throws SQLException {
+        String sql = "SELECT subject_name FROM subjects ORDER BY subject_name ASC";
 
         List<String> subjects = new ArrayList<>();
 
-        try (
-                Connection connection =
-                        DatabaseConnection.getConnection();
-                PreparedStatement statement =
-                        connection.prepareStatement(sql)
-        ) {
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet rs = statement.executeQuery()) {
 
-            statement.setInt(1, tutorId);
-
-            try (ResultSet rs =
-                         statement.executeQuery()) {
-
-                while (rs.next()) {
-                    subjects.add(
-                            rs.getString("subject_name")
-                    );
-                }
+            while (rs.next()) {
+                subjects.add(rs.getString("subject_name"));
             }
         }
 
         return subjects;
     }
 
-    public List<String> findAllSubjects()
-            throws SQLException {
+    public List<SubjectOption> findSubjectOptionsByTutorId(int tutorId) throws SQLException {
+        String sql = "SELECT subject_id, subject_name FROM subjects ORDER BY subject_name ASC";
 
+        List<SubjectOption> subjects = new ArrayList<>();
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet rs = statement.executeQuery()) {
+
+            while (rs.next()) {
+                subjects.add(new SubjectOption(
+                        rs.getInt("subject_id"),
+                        rs.getString("subject_name")
+                ));
+            }
+        }
+
+        return subjects;
+    }
+
+    public List<String> findAllSubjects() throws SQLException {
         String sql = """
                 SELECT subject_name
                 FROM subjects
@@ -57,101 +54,46 @@ public class TutorSubjectRepository {
 
         List<String> subjects = new ArrayList<>();
 
-        try (
-                Connection connection =
-                        DatabaseConnection.getConnection();
-                PreparedStatement statement =
-                        connection.prepareStatement(sql);
-                ResultSet rs =
-                        statement.executeQuery()
-        ) {
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet rs = statement.executeQuery()) {
 
             while (rs.next()) {
-                subjects.add(
-                        rs.getString("subject_name")
-                );
+                subjects.add(rs.getString("subject_name"));
             }
         }
 
         return subjects;
     }
 
-    public void addSubject(
-            int tutorId,
-            String subjectName
-    ) throws SQLException {
-
-        String findSql = """
-                SELECT subject_id
-                FROM subjects
-                WHERE subject_name = ?
-                """;
-
-        String insertSql = """
-                INSERT INTO tutor_subjects
-                (tutor_id, subject_id)
-                VALUES (?, ?)
-                """;
-
-        try (
-                Connection connection =
-                        DatabaseConnection.getConnection();
-                PreparedStatement find =
-                        connection.prepareStatement(findSql)
-        ) {
-
-            find.setString(1, subjectName);
-
-            try (ResultSet rs =
-                         find.executeQuery()) {
-
-                if (!rs.next()) {
-                    throw new SQLException(
-                            "Subject not found."
-                    );
-                }
-
-                int subjectId =
-                        rs.getInt("subject_id");
-
-                try (PreparedStatement insert =
-                             connection.prepareStatement(
-                                     insertSql
-                             )) {
-
-                    insert.setInt(1, tutorId);
-                    insert.setInt(2, subjectId);
-                    insert.executeUpdate();
-                }
-            }
-        }
+    public void addSubject(int tutorId, String subjectName) throws SQLException {
+        // Global system: Subjects already exist globally
     }
 
-    public void removeSubject(
-            int tutorId,
-            String subjectName
-    ) throws SQLException {
+    public void removeSubject(int tutorId, String subjectName) throws SQLException {
+        // Global system: Subjects are shared and not removable per tutor
+    }
 
-        String sql = """
-                DELETE ts
-                FROM tutor_subjects ts
-                JOIN subjects s
-                    ON ts.subject_id = s.subject_id
-                WHERE ts.tutor_id = ?
-                  AND s.subject_name = ?
-                """;
+    public static class SubjectOption {
+        private final int id;
+        private final String name;
 
-        try (
-                Connection connection =
-                        DatabaseConnection.getConnection();
-                PreparedStatement statement =
-                        connection.prepareStatement(sql)
-        ) {
+        public SubjectOption(int id, String name) {
+            this.id = id;
+            this.name = name;
+        }
 
-            statement.setInt(1, tutorId);
-            statement.setString(2, subjectName);
+        public int getId() {
+            return id;
+        }
 
-            statement.executeUpdate();
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String toString() {
+            return name;
         }
     }
 }

@@ -286,19 +286,23 @@ public class FindTutorsController {
     private String getAvailability(int tutorId) {
 
         String sql = """
-                SELECT day_of_week,
-                       start_time,
-                       end_time,
-                       description,
-                       status
-                FROM availability
-                WHERE tutor_id = ?
-                  AND status = 'Available'
+                SELECT
+                    a.day_of_week,
+                    a.start_time,
+                    a.end_time,
+                    a.description,
+                    a.status,
+                    s.subject_name
+                FROM availability a
+                JOIN subjects s
+                    ON a.subject_id = s.subject_id
+                WHERE a.tutor_id = ?
+                  AND a.status = 'Available'
                 ORDER BY
-                    FIELD(day_of_week,
+                    FIELD(a.day_of_week,
                     'Monday','Tuesday','Wednesday',
                     'Thursday','Friday','Saturday','Sunday'),
-                    start_time
+                    a.start_time
                 """;
 
         StringBuilder result =
@@ -320,12 +324,21 @@ public class FindTutorsController {
 
                     result.append(
                             rs.getString("day_of_week")
-                    ).append(" ")
+                    ).append("\n");
+
+                    result.append(
+                            formatTime(
+                                    rs.getTime("start_time")
+                            )
+                    ).append(" – ")
                     .append(
-                            rs.getTime("start_time")
-                    ).append(" - ")
-                    .append(
-                            rs.getTime("end_time")
+                            formatTime(
+                                    rs.getTime("end_time")
+                            )
+                    ).append("\n");
+
+                    result.append(
+                            rs.getString("subject_name")
                     );
 
                     String description =
@@ -338,7 +351,7 @@ public class FindTutorsController {
                               .append(description.trim());
                     }
 
-                    result.append("\n");
+                    result.append("\n\n");
                 }
             }
 
@@ -350,6 +363,33 @@ public class FindTutorsController {
         }
 
         return result.toString().trim();
+    }
+
+    private String formatTime(Time time) {
+
+        if (time == null) {
+            return "N/A";
+        }
+
+        int hour = time.toLocalTime().getHour();
+        int minute = time.toLocalTime().getMinute();
+
+        String period =
+                hour >= 12 ? "PM" : "AM";
+
+        int displayHour =
+                hour % 12;
+
+        if (displayHour == 0) {
+            displayHour = 12;
+        }
+
+        return String.format(
+                "%d:%02d %s",
+                displayHour,
+                minute,
+                period
+        );
     }
 
     private String safe(String value) {

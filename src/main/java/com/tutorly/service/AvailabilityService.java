@@ -28,13 +28,8 @@ public class AvailabilityService {
         return repository.findByTutorId(tutorId);
     }
 
-    public void addAvailability(
-            int tutorId,
-            String day,
-            LocalTime start,
-            LocalTime end,
-            String description
-    ) throws SQLException {
+    public List<AvailabilityRepository.SubjectOption>
+    getTutorSubjects(int tutorId) throws SQLException {
 
         if (tutorId <= 0) {
             throw new IllegalArgumentException(
@@ -42,21 +37,134 @@ public class AvailabilityService {
             );
         }
 
-        if (day == null || day.isBlank()) {
+        return repository.findSubjectsByTutorId(tutorId);
+    }
+
+    public void addAvailability(
+            int tutorId,
+            int subjectId,
+            String day,
+            LocalTime start,
+            LocalTime end,
+            String description
+    ) throws SQLException {
+
+        validate(
+                tutorId,
+                subjectId,
+                day,
+                start,
+                end,
+                description
+        );
+
+        if (!repository.tutorTeachesSubject(
+                tutorId,
+                subjectId
+        )) {
+
             throw new IllegalArgumentException(
-                    "Day is required."
+                    "You can only select a subject that you teach."
             );
         }
 
-        if (description == null) {
-            description = "";
+        Availability availability =
+                new Availability();
+
+        availability.setTutorId(tutorId);
+        availability.setSubjectId(subjectId);
+        availability.setDayOfWeek(day);
+        availability.setStartTime(start);
+        availability.setEndTime(end);
+        availability.setDescription(
+                description == null
+                        ? ""
+                        : description.trim()
+        );
+        availability.setStatus("Available");
+
+        repository.create(availability);
+    }
+
+    public void updateAvailability(
+            int availabilityId,
+            int tutorId,
+            int subjectId,
+            String day,
+            LocalTime start,
+            LocalTime end,
+            String description
+    ) throws SQLException {
+
+        if (availabilityId <= 0) {
+            throw new IllegalArgumentException(
+                    "Invalid availability ID."
+            );
         }
 
-        description = description.trim();
+        validate(
+                tutorId,
+                subjectId,
+                day,
+                start,
+                end,
+                description
+        );
 
-        if (description.length() > 500) {
+        if (!repository.tutorTeachesSubject(
+                tutorId,
+                subjectId
+        )) {
+
             throw new IllegalArgumentException(
-                    "Description must be 500 characters or less."
+                    "You can only select a subject that you teach."
+            );
+        }
+
+        boolean updated =
+                repository.update(
+                        availabilityId,
+                        tutorId,
+                        subjectId,
+                        day,
+                        start,
+                        end,
+                        description == null
+                                ? ""
+                                : description.trim()
+                );
+
+        if (!updated) {
+            throw new IllegalArgumentException(
+                    "Availability could not be updated."
+            );
+        }
+    }
+
+    private void validate(
+            int tutorId,
+            int subjectId,
+            String day,
+            LocalTime start,
+            LocalTime end,
+            String description
+    ) {
+
+        if (tutorId <= 0) {
+            throw new IllegalArgumentException(
+                    "Invalid tutor ID."
+            );
+        }
+
+        if (subjectId <= 0) {
+            throw new IllegalArgumentException(
+                    "Please select a subject."
+            );
+        }
+
+        if (day == null || day.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Day is required."
             );
         }
 
@@ -72,17 +180,13 @@ public class AvailabilityService {
             );
         }
 
-        Availability availability =
-                new Availability();
+        if (description != null &&
+                description.trim().length() > 500) {
 
-        availability.setTutorId(tutorId);
-        availability.setDayOfWeek(day);
-        availability.setStartTime(start);
-        availability.setEndTime(end);
-        availability.setDescription(description);
-        availability.setStatus("Available");
-
-        repository.create(availability);
+            throw new IllegalArgumentException(
+                    "Description must be 500 characters or less."
+            );
+        }
     }
 
     public void deleteAvailability(
@@ -108,6 +212,9 @@ public class AvailabilityService {
                         ? "Unavailable"
                         : "Available";
 
-        repository.updateStatus(availabilityId, nextStatus);
+        repository.updateStatus(
+                availabilityId,
+                nextStatus
+        );
     }
 }
