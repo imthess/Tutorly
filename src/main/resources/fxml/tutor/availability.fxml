@@ -10,9 +10,11 @@
             styleClass="root">
 
     <top>
+
         <HBox spacing="15"
               alignment="CENTER_LEFT"
               styleClass="top-bar">
+
             <padding>
                 <Insets top="18"
                         right="30"
@@ -26,11 +28,15 @@
 
             <Label text="Manage Availability"
                    styleClass="app-title"/>
+
         </HBox>
+
     </top>
 
     <center>
+
         <VBox spacing="22">
+
             <padding>
                 <Insets top="30"
                         right="40"
@@ -41,32 +47,51 @@
             <Label text="Set your teaching schedule"
                    styleClass="page-title"/>
 
-            <HBox spacing="12">
+            <GridPane hgap="12"
+                      vgap="12">
+
+                <columnConstraints>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                </columnConstraints>
 
                 <ComboBox fx:id="dayComboBox"
                           promptText="Day"
-                          prefWidth="150"/>
+                          GridPane.columnIndex="0"/>
+
+                <ComboBox fx:id="subjectComboBox"
+                          promptText="Subject"
+                          GridPane.columnIndex="1"/>
 
                 <ComboBox fx:id="startComboBox"
                           promptText="Start"
-                          prefWidth="130"/>
+                          GridPane.columnIndex="2"/>
 
                 <ComboBox fx:id="endComboBox"
                           promptText="End"
-                          prefWidth="130"/>
+                          GridPane.columnIndex="3"/>
 
                 <TextArea fx:id="descriptionField"
                           promptText="What will you teach during this time?"
-                          prefWidth="280"
                           prefHeight="70"
-                          wrapText="true"/>
+                          wrapText="true"
+                          GridPane.columnIndex="0"
+                          GridPane.rowIndex="1"
+                          GridPane.columnSpan="3"/>
 
-                <Button text="Add"
-                        onAction="#handleAddAvailability"
-                        styleClass="secondary-button"/>
-            </HBox>
+                <Button fx:id="saveButton"
+                        text="Add Availability"
+                        onAction="#handleSaveAvailability"
+                        styleClass="secondary-button"
+                        GridPane.columnIndex="3"
+                        GridPane.rowIndex="1"/>
 
-            <Label fx:id="messageLabel"/>
+            </GridPane>
+
+            <Label fx:id="messageLabel"
+                   wrapText="true"/>
 
             <TableView fx:id="availabilityTable"
                        VBox.vgrow="ALWAYS">
@@ -75,15 +100,19 @@
 
                     <TableColumn fx:id="dayColumn"
                                  text="Day"
-                                 prefWidth="180"/>
+                                 prefWidth="130"/>
+
+                    <TableColumn fx:id="subjectColumn"
+                                 text="Subject"
+                                 prefWidth="240"/>
 
                     <TableColumn fx:id="startColumn"
                                  text="Start"
-                                 prefWidth="150"/>
+                                 prefWidth="110"/>
 
                     <TableColumn fx:id="endColumn"
                                  text="End"
-                                 prefWidth="120"/>
+                                 prefWidth="110"/>
 
                     <TableColumn fx:id="descriptionColumn"
                                  text="What I'll Teach"
@@ -99,6 +128,9 @@
 
             <HBox spacing="12">
 
+                <Button text="Edit Selected"
+                        onAction="#handleEditAvailability"/>
+
                 <Button text="Enable / Disable"
                         onAction="#handleToggleAvailability"/>
 
@@ -108,6 +140,7 @@
             </HBox>
 
         </VBox>
+
     </center>
 
 </BorderPane>
