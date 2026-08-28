@@ -32,7 +32,8 @@ public class AvailabilityService {
             int tutorId,
             String day,
             LocalTime start,
-            LocalTime end
+            LocalTime end,
+            String description
     ) throws SQLException {
 
         if (tutorId <= 0) {
@@ -44,6 +45,18 @@ public class AvailabilityService {
         if (day == null || day.isBlank()) {
             throw new IllegalArgumentException(
                     "Day is required."
+            );
+        }
+
+        if (description == null) {
+            description = "";
+        }
+
+        description = description.trim();
+
+        if (description.length() > 500) {
+            throw new IllegalArgumentException(
+                    "Description must be 500 characters or less."
             );
         }
 
@@ -66,6 +79,7 @@ public class AvailabilityService {
         availability.setDayOfWeek(day);
         availability.setStartTime(start);
         availability.setEndTime(end);
+        availability.setDescription(description);
         availability.setStatus("Available");
 
         repository.create(availability);

@@ -28,10 +28,11 @@ public class AvailabilityRepository {
                     day_of_week,
                     start_time,
                     end_time,
+                    description,
                     status
                 )
-                VALUES (?, ?, ?, ?, ?)
-                """;
+                VALUES (?, ?, ?, ?, ?, ?)\s
+               \s""";
 
         try (
                 Connection connection =
@@ -70,6 +71,11 @@ public class AvailabilityRepository {
 
             statement.setString(
                     5,
+                    availability.getDescription()
+            );
+
+            statement.setString(
+                    6,
                     availability.getStatus()
             );
 
@@ -108,6 +114,7 @@ public class AvailabilityRepository {
                     day_of_week,
                     start_time,
                     end_time,
+                    description,
                     status
                 FROM availability
                 WHERE tutor_id = ?
@@ -330,6 +337,8 @@ public class AvailabilityRepository {
         availability.setStatus(
                 rs.getString("status")
         );
+
+        availability.setDescription(rs.getString("description"));
 
         return availability;
     }

@@ -55,6 +55,12 @@
                           promptText="End"
                           prefWidth="130"/>
 
+                <TextArea fx:id="descriptionField"
+                          promptText="What will you teach during this time?"
+                          prefWidth="280"
+                          prefHeight="70"
+                          wrapText="true"/>
+
                 <Button text="Add"
                         onAction="#handleAddAvailability"
                         styleClass="secondary-button"/>
@@ -77,11 +83,15 @@
 
                     <TableColumn fx:id="endColumn"
                                  text="End"
-                                 prefWidth="150"/>
+                                 prefWidth="120"/>
+
+                    <TableColumn fx:id="descriptionColumn"
+                                 text="What I'll Teach"
+                                 prefWidth="300"/>
 
                     <TableColumn fx:id="statusColumn"
                                  text="Status"
-                                 prefWidth="150"/>
+                                 prefWidth="120"/>
 
                 </columns>
 

@@ -32,6 +32,9 @@ public class AvailabilityController {
     private ComboBox<String> endComboBox;
 
     @FXML
+    private TextArea descriptionField;
+
+    @FXML
     private TableView<Availability> availabilityTable;
 
     @FXML
@@ -42,6 +45,9 @@ public class AvailabilityController {
 
     @FXML
     private TableColumn<Availability, LocalTime> endColumn;
+
+    @FXML
+    private TableColumn<Availability, String> descriptionColumn;
 
     @FXML
     private TableColumn<Availability, String> statusColumn;
@@ -97,6 +103,12 @@ public class AvailabilityController {
         endColumn.setCellValueFactory(
                 new PropertyValueFactory<>(
                         "endTime"
+                )
+        );
+
+        descriptionColumn.setCellValueFactory(
+                new PropertyValueFactory<>(
+                        "description"
                 )
         );
 
@@ -173,6 +185,7 @@ public class AvailabilityController {
         String selectedDay = dayComboBox.getValue();
         String startTimeStr = startComboBox.getValue();
         String endTimeStr = endComboBox.getValue();
+        String description = descriptionField.getText();
 
         if (selectedDay == null || startTimeStr == null || endTimeStr == null) {
             messageLabel.setText("Please select day, start time, and end time.");
@@ -205,7 +218,8 @@ public class AvailabilityController {
                     tutor.getTutorId(),
                     selectedDay,
                     startTime,
-                    endTime
+                    endTime,
+                    description
             );
 
             messageLabel.setText("Availability added successfully!");
@@ -213,6 +227,7 @@ public class AvailabilityController {
             dayComboBox.getSelectionModel().clearSelection();
             startComboBox.getSelectionModel().clearSelection();
             endComboBox.getSelectionModel().clearSelection();
+            descriptionField.clear();
 
             loadAvailability();
 

@@ -289,6 +289,7 @@ public class FindTutorsController {
                 SELECT day_of_week,
                        start_time,
                        end_time,
+                       description,
                        status
                 FROM availability
                 WHERE tutor_id = ?
@@ -325,7 +326,19 @@ public class FindTutorsController {
                     ).append(" - ")
                     .append(
                             rs.getTime("end_time")
-                    ).append("\n");
+                    );
+
+                    String description =
+                            rs.getString("description");
+
+                    if (description != null &&
+                            !description.isBlank()) {
+
+                        result.append(" | ")
+                              .append(description.trim());
+                    }
+
+                    result.append("\n");
                 }
             }
 

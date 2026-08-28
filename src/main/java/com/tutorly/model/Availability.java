@@ -9,6 +9,7 @@ public class Availability {
     private String dayOfWeek;
     private LocalTime startTime;
     private LocalTime endTime;
+    private String description;
     private String status;
 
     public Availability() {
@@ -52,6 +53,14 @@ public class Availability {
 
     public void setEndTime(LocalTime endTime) {
         this.endTime = endTime;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getStatus() {
