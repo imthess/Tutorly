@@ -1,80 +1,123 @@
 # Tutorly
 
-Tutorly is a JavaFX-based tutoring marketplace application designed to connect students and tutors through tutor discovery, booking, payments, notifications, and online classes.
+Tutorly is a JavaFX-based tutoring marketplace application that connects students and tutors through tutor discovery, availability, booking, payment, notifications, and online classes.
 
-## Features
+## Project Overview
+
+Tutorly is designed as a modular Java application with a layered structure separating the user interface, business services, persistence, models, and supporting infrastructure.
+
+The project also demonstrates software engineering design patterns through practical application features such as notifications, payments, tutor profiles, and live classes.
+
+## Core Features
 
 - Student and tutor accounts
 - Authentication and role-based workflows
-- Tutor profiles and subject management
-- Tutor availability management
-- Tutor search and selection
-- Booking and booking-status management
+- Tutor profiles
+- Subject management
+- Tutor availability
+- Tutor discovery
+- Booking management
 - Payment workflow
 - Student notifications
 - Online class scheduling
 - Native in-app live classroom
-- Accepted students can join an active class
-- Tutor-controlled class start and completion
 - Admin functionality
 - MySQL database integration
 
 ## Student Workflow
 
-1. Create an account and log in.
+1. Register and log in.
 2. Browse tutors and subjects.
-3. View tutor information and availability.
-4. Book a tutoring session.
+3. Review tutor information and availability.
+4. Submit a booking.
 5. Track booking status.
-6. Receive notifications about booking, payment, and class events.
-7. Join an active online class when the tutor starts it.
+6. Receive relevant notifications.
+7. Join an active online class after the tutor starts it.
+8. Participate in the live classroom.
 
 ## Tutor Workflow
 
-1. Create an account and manage a tutor profile.
-2. Select teaching subjects.
-3. Configure availability.
-4. Review incoming bookings.
-5. Accept or manage bookings.
-6. Start scheduled online classes.
-7. Conduct the class through the native live classroom.
+1. Register and log in.
+2. Create and manage a tutor profile.
+3. Select teaching subjects.
+4. Configure availability.
+5. Review incoming bookings.
+6. Accept or manage bookings.
+7. Start a scheduled online class.
 8. Complete the class after the session.
 
 ## Native Live Classroom
 
-Tutorly includes a native live-class system based on scheduled class occurrences.
+Tutorly contains a native live-class workflow rather than depending entirely on an external meeting application.
 
-- A tutor selects the exact subject, date, and time.
-- Accepted bookings for that occurrence share the same class.
+The workflow is based on an exact class occurrence:
+
+- The tutor selects the subject, date, and time.
+- Accepted bookings for the same occurrence are associated with the class.
 - Students cannot join before the tutor starts the class.
 - Only students with an accepted booking can join.
 - The live server validates the student's identity.
 - A completed class cannot be started again.
-- Failed actions are reported to the user instead of terminating the application.
+- Failed operations are reported to the user instead of crashing the application.
+
+## Architecture
+
+```text
+                    ┌─────────────────────┐
+                    │   JavaFX UI / FXML  │
+                    │    Controllers      │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │      Services       │
+                    │ Business Logic      │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │    Repositories     │
+                    │   JDBC / SQL        │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │       MySQL         │
+                    └─────────────────────┘
+
+     ┌──────────────┐ ┌──────────────┐ ┌────────────────┐
+     │ Design       │ │ Notification │ │ Native Live    │
+     │ Patterns     │ │ / Observer   │ │ Class System   │
+     └──────────────┘ └──────────────┘ └────────────────┘
+```
 
 ## Design Patterns
 
-- **Singleton** — shared application/database-related services
-- **Factory** — controlled creation of related objects
-- **Observer** — notification delivery
-- **Strategy** — interchangeable payment-related behavior
-- **Decorator** — extending tutor profile/service behavior
-- **Facade** — simplified access to complex workflows such as live classes
-- **Proxy** — controlled access to selected services
-- **Adapter** — integration between incompatible interfaces
-- **Template Method** — reusable workflow structure
+The codebase contains and applies multiple software engineering patterns, including:
+
+- **Singleton**
+- **Factory**
+- **Observer**
+- **Strategy**
+- **Decorator**
+- **Facade**
+- **Proxy**
+- **Adapter**
+- **Template Method**
+
+Examples include notification propagation through the Observer structure, simplified live-class operations through the Facade structure, and interchangeable payment behavior through Strategy-based components.
 
 ## Technology Stack
 
-| Component | Technology |
+| Area | Technology |
 |---|---|
 | Language | Java |
 | Java Version | JDK 21 |
 | UI | JavaFX 21 |
-| Build Tool | Maven |
+| Build | Maven |
 | Database | MySQL |
-| Architecture | Layered / service-repository architecture |
-| Live Classes | Native Java networking-based implementation |
+| Persistence | JDBC / SQL |
+| Live Classes | Native Java networking components |
 
 ## Project Structure
 
@@ -107,61 +150,74 @@ Tutorly/
 └── README.md
 ```
 
-## Architecture
-
-```text
-JavaFX Controllers
-        │
-        ▼
-     Services
-        │
-        ▼
-   Repositories
-        │
-        ▼
-     MySQL
-```
-
-Supporting components include models, authentication, notifications, payments, live classroom services, design patterns, and navigation/session management.
-
 ## Database
 
-The database schema is provided in `database/tutorly.sql` and contains the core entities required by the application, including users, students, tutors, subjects, tutor subjects, availability, bookings, online classes, notifications, and payment-related data.
+The database schema is provided in `database/tutorly.sql`.
+
+The schema includes the application's core entities, including users, students, tutors, subjects, tutor-subject relationships, availability, bookings, online classes, notifications, and payment-related data.
 
 ## Requirements
 
 - JDK 21
 - Maven
 - MySQL
-- JavaFX 21 dependencies configured through Maven
+- A configured MySQL database using the supplied schema
 
-## Running the Project
+## Run Locally
+
+Clone the repository:
 
 ```bash
 git clone https://github.com/imthess/Tutorly.git
 cd Tutorly
 ```
 
-Configure MySQL using `database/tutorly.sql`, then run:
+Configure the MySQL database using:
+
+```text
+database/tutorly.sql
+```
+
+Build the project:
 
 ```bash
 mvn clean compile
+```
+
+Run the application:
+
+```bash
 mvn javafx:run
 ```
 
-## Development
+## Testing
 
-Tutorly emphasizes object-oriented design, separation of concerns, design patterns, database-driven application development, maintainable service/repository layers, event-driven notifications, and native client-server communication for live classes.
+The project contains a test source structure under:
+
+```text
+src/test/java
+```
+
+A useful next step for maintainability is expanding automated JUnit 5 tests around services, repositories, pattern implementations, and live-class authorization.
+
+## Documentation
+
+Additional project documentation is maintained under `docs/`, including architecture and development planning material.
 
 ## Future Improvements
 
-- Improved live-class media capabilities
-- More advanced tutor discovery and filtering
-- Expanded communication features
-- Improved administrative tools
-- Additional automated testing
-- Further UI/UX improvements
+Planned improvement areas include:
+
+- Broader automated test coverage
+- More isolated service-level testing
+- Connection pooling for database access
+- Stronger repository interfaces
+- More detailed architecture/UML documentation
+- Further live-class media capabilities
+- Expanded tutor discovery and filtering
+- Additional administrative functionality
+- Continued UI/UX refinement
 
 ## License
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+This project is licensed under the MIT License. See `LICENSE` for details.
