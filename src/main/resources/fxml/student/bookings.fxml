@@ -69,6 +69,10 @@
 
             <Label fx:id="messageLabel"/>
 
+            <Button text="Join Online Class"
+                    onAction="#handleJoinOnlineClass"
+                    styleClass="primary-button"/>
+
             <Button text="Back to Dashboard"
                     onAction="#handleBack"
                     styleClass="secondary-button"/>

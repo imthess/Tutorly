@@ -1,84 +1,33 @@
 package com.tutorly.patterns.proxy;
 
-import java.awt.Desktop;
-import java.net.URI;
-import java.util.concurrent.CompletableFuture;
+import com.tutorly.live.LiveClassRoom;
+import com.tutorly.live.LiveClassServer;
+import com.tutorly.model.User;
 
-/**
- * Real Subject of the Proxy pattern.
- *
- * Opens the actual Jitsi meeting using the system browser.
- */
+/** Real subject of the Proxy pattern. Opens Tutorly's own in-app classroom. */
 public class RealVideoService implements VideoService {
-
     private final String meetingUrl;
-
+    private final User user;
+    private final LiveClassServer server;
     private volatile boolean running;
 
-    public RealVideoService(String meetingUrl) {
-        this.meetingUrl = meetingUrl;
+    public RealVideoService(String meetingUrl) { this(null, null, meetingUrl); }
+    public RealVideoService(User user, String meetingUrl) { this(user, null, meetingUrl); }
+    public RealVideoService(User user, LiveClassServer server, String meetingUrl) {
+        this.user = user; this.server = server; this.meetingUrl = meetingUrl;
     }
 
-    @Override
-    public void startVideo() {
-
-        if (running) {
-            return;
+    @Override public void startVideo() {
+        if (running) return;
+        try {
+            LiveClassRoom.openTutor(user, server, meetingUrl);
+            running = true;
+        } catch (Exception e) {
+            running = false;
+            System.err.println("Failed to open Tutorly classroom: " + e.getMessage());
         }
-
-        running = true;
-
-        CompletableFuture.runAsync(() -> {
-
-            try {
-
-                if (!Desktop.isDesktopSupported()) {
-
-                    System.out.println(
-                            "System browser is not supported."
-                    );
-
-                    running = false;
-                    return;
-                }
-
-                Desktop.getDesktop().browse(
-                        URI.create(meetingUrl)
-                );
-
-                System.out.println(
-                        "Jitsi live class opened in browser."
-                );
-
-            } catch (Exception e) {
-
-                running = false;
-
-                System.out.println(
-                        "Failed to open Jitsi: "
-                                + e.getMessage()
-                );
-            }
-
-        });
     }
 
-    @Override
-    public void stopVideo() {
-
-        if (!running) {
-            return;
-        }
-
-        running = false;
-
-        System.out.println(
-                "Jitsi live class stopped."
-        );
-    }
-
-    @Override
-    public boolean isRunning() {
-        return running;
-    }
+    @Override public void stopVideo() { running = false; }
+    @Override public boolean isRunning() { return running; }
 }

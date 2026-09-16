@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.tutorly.controller.NotificationsController"
+            prefWidth="1100" prefHeight="700" styleClass="root">
+    <top>
+        <VBox spacing="6">
+            <padding><Insets top="25" right="30" bottom="20" left="30"/></padding>
+            <Label text="Notifications" styleClass="page-title"/>
+            <Label fx:id="unreadLabel" text="0 unread notification(s)" styleClass="section-title"/>
+        </VBox>
+    </top>
+    <center>
+        <VBox spacing="15">
+            <padding><Insets top="10" right="30" bottom="20" left="30"/></padding>
+            <TableView fx:id="notificationTable" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="typeColumn" text="Type" prefWidth="110"/>
+                    <TableColumn fx:id="messageColumn" text="Message" prefWidth="560"/>
+                    <TableColumn fx:id="dateColumn" text="Date" prefWidth="220"/>
+                    <TableColumn fx:id="readColumn" text="Status" prefWidth="100"/>
+                </columns>
+            </TableView>
+            <Label fx:id="messageLabel" wrapText="true"/>
+            <HBox spacing="10">
+                <Button text="Mark Selected Read" onAction="#handleMarkSelectedRead"/>
+                <Button text="Mark All Read" onAction="#handleMarkAllRead" styleClass="secondary-button"/>
+                <Button text="Refresh" onAction="#handleRefresh"/>
+                <Button text="Back" onAction="#handleBack" styleClass="text-button"/>
+            </HBox>
+        </VBox>
+    </center>
+</BorderPane>

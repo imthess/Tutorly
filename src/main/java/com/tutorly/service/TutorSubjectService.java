@@ -13,44 +13,58 @@ public class TutorSubjectService {
         repository = new TutorSubjectRepository();
     }
 
+    public List<TutorSubjectRepository.SubjectOption> getTutorSubjectOptions(
+            int tutorId
+    ) throws SQLException {
+        validateTutorId(tutorId);
+        return repository.findSubjectsByTutorId(tutorId);
+    }
+
     public List<String> getTutorSubjects(
             int tutorId
     ) throws SQLException {
+        validateTutorId(tutorId);
+        return repository.findSubjectsByTutorIdAsNames(tutorId);
+    }
 
-        return repository.findSubjectsByTutorId(tutorId);
+    public List<TutorSubjectRepository.SubjectOption> getAllSubjectOptions()
+            throws SQLException {
+        return repository.findAllSubjectOptions();
     }
 
     public List<String> getAllSubjects()
             throws SQLException {
-
         return repository.findAllSubjects();
     }
 
-    public void addSubject(
+    public int addSubject(
             int tutorId,
             String subject
     ) throws SQLException {
-
-        if (subject == null || subject.isBlank()) {
-            throw new IllegalArgumentException(
-                    "Subject is required."
-            );
-        }
-
-        repository.addSubject(
-                tutorId,
-                subject
-        );
+        validateTutorId(tutorId);
+        return repository.addSubject(tutorId, subject);
     }
 
     public void removeSubject(
             int tutorId,
-            String subject
+            int subjectId
     ) throws SQLException {
+        validateTutorId(tutorId);
+        repository.removeSubject(tutorId, subjectId);
+    }
 
-        repository.removeSubject(
-                tutorId,
-                subject
-        );
+    public boolean tutorTeachesSubject(
+            int tutorId,
+            int subjectId
+    ) throws SQLException {
+        validateTutorId(tutorId);
+        if (subjectId <= 0) return false;
+        return repository.tutorTeachesSubject(tutorId, subjectId);
+    }
+
+    private void validateTutorId(int tutorId) {
+        if (tutorId <= 0) {
+            throw new IllegalArgumentException("Invalid tutor ID.");
+        }
     }
 }

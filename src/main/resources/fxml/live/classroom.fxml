@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.tutorly.live.LiveClassRoomController" styleClass="root">
+    <top>
+        <VBox spacing="6" styleClass="top-bar">
+            <padding><Insets top="14" right="20" bottom="14" left="20"/></padding>
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label fx:id="titleLabel" text="Tutorly Live Classroom" styleClass="page-title" HBox.hgrow="ALWAYS"/>
+                <Button fx:id="chatToggleButton" text="✉" onAction="#handleToggleChat" styleClass="text-button">
+                    <tooltip><Tooltip text="Open / close class chat"/></tooltip>
+                </Button>
+                <Button fx:id="whiteboardToggleButton" text="✎" onAction="#handleToggleWhiteboard" styleClass="text-button">
+                    <tooltip><Tooltip text="Open / close whiteboard"/></tooltip>
+                </Button>
+            </HBox>
+            <Label fx:id="connectionLabel" text="Connecting..."/>
+            <Label fx:id="participantsLabel" text="Participants: None"/>
+        </VBox>
+    </top>
+    <center>
+        <VBox spacing="10" fillWidth="true">
+            <padding><Insets top="15" right="20" bottom="15" left="20"/></padding>
+            <HBox spacing="12" VBox.vgrow="ALWAYS">
+                <VBox spacing="8" HBox.hgrow="ALWAYS">
+                    <Label text="Live Video" styleClass="section-title"/>
+                    <StackPane style="-fx-border-color: #888; -fx-border-radius: 6;" VBox.vgrow="ALWAYS">
+                        <ImageView fx:id="cameraView" fitWidth="620" fitHeight="420" preserveRatio="true"/>
+                        <Label text="Waiting for tutor camera..." mouseTransparent="true"/>
+                    </StackPane>
+                    <HBox spacing="12">
+                        <Label fx:id="cameraLabel" text="Camera: OFF"/>
+                        <Label fx:id="microphoneLabel" text="Microphone: OFF"/>
+                    </HBox>
+                </VBox>
+                <VBox spacing="8" prefWidth="310">
+                    <TitledPane fx:id="chatPane" text="💬 Class Chat" expanded="false" animated="true" VBox.vgrow="ALWAYS">
+                        <content>
+                            <VBox spacing="8" prefWidth="300">
+                                <TextArea fx:id="chatArea" editable="false" wrapText="true" VBox.vgrow="ALWAYS"/>
+                                <HBox spacing="8">
+                                    <TextField fx:id="chatInput" promptText="Type a message..." HBox.hgrow="ALWAYS" onAction="#handleSendChat"/>
+                                    <Button fx:id="sendButton" text="Send" onAction="#handleSendChat"/>
+                                </HBox>
+                            </VBox>
+                        </content>
+                    </TitledPane>
+                    <TitledPane fx:id="whiteboardPane" text="✎ Shared Whiteboard" expanded="false" animated="true" VBox.vgrow="ALWAYS">
+                        <content>
+                            <VBox spacing="8">
+                                <TextArea fx:id="whiteboardArea" wrapText="true" promptText="Tutor writes lesson notes here..." VBox.vgrow="ALWAYS"/>
+                                <Button fx:id="whiteboardSendButton" text="Share Whiteboard" onAction="#handleSendWhiteboard" maxWidth="Infinity"/>
+                            </VBox>
+                        </content>
+                    </TitledPane>
+                </VBox>
+            </HBox>
+        </VBox>
+    </center>
+    <bottom>
+        <HBox spacing="10" alignment="CENTER_RIGHT">
+            <padding><Insets top="8" right="20" bottom="15" left="20"/></padding>
+            <Button fx:id="endButton" text="End Live Class" onAction="#handleEndClass" styleClass="primary-button"/>
+            <Button text="Leave Classroom" onAction="#handleBack"/>
+        </HBox>
+    </bottom>
+</BorderPane>

@@ -14,6 +14,8 @@ import java.util.Locale;
 
 public class AvailabilityRepository {
 
+    private final TutorSubjectRepository tutorSubjectRepository = new TutorSubjectRepository();
+
     public int create(Availability availability) throws SQLException {
         String sql = """
                 INSERT INTO availability
@@ -23,7 +25,6 @@ public class AvailabilityRepository {
 
         try (Connection connection = DatabaseConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
             statement.setInt(1, availability.getTutorId());
             statement.setInt(2, availability.getSubjectId());
             statement.setString(3, availability.getDayOfWeek());
@@ -31,25 +32,22 @@ public class AvailabilityRepository {
             statement.setTime(5, Time.valueOf(availability.getEndTime()));
             statement.setString(6, availability.getDescription());
             statement.setString(7, availability.getStatus());
-
             statement.executeUpdate();
 
             try (ResultSet keys = statement.getGeneratedKeys()) {
                 if (keys.next()) {
-                    int availabilityId = keys.getInt(1);
-                    availability.setAvailabilityId(availabilityId);
-                    return availabilityId;
+                    int id = keys.getInt(1);
+                    availability.setAvailabilityId(id);
+                    return id;
                 }
             }
         }
-
         throw new SQLException("Failed to create availability record.");
     }
 
     public boolean update(int availabilityId, int tutorId, int subjectId,
                           String dayOfWeek, LocalTime startTime, LocalTime endTime,
                           String description) throws SQLException {
-
         String sql = """
                 UPDATE availability
                 SET subject_id = ?, day_of_week = ?, start_time = ?, end_time = ?, description = ?
@@ -58,7 +56,6 @@ public class AvailabilityRepository {
 
         try (Connection connection = DatabaseConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
-
             statement.setInt(1, subjectId);
             statement.setString(2, dayOfWeek);
             statement.setTime(3, Time.valueOf(startTime));
@@ -66,7 +63,6 @@ public class AvailabilityRepository {
             statement.setString(5, description);
             statement.setInt(6, availabilityId);
             statement.setInt(7, tutorId);
-
             return statement.executeUpdate() > 0;
         }
     }
@@ -80,89 +76,99 @@ public class AvailabilityRepository {
                 WHERE a.tutor_id = ?
                 ORDER BY
                     CASE a.day_of_week
-                        WHEN 'Monday' THEN 1
-                        WHEN 'Tuesday' THEN 2
-                        WHEN 'Wednesday' THEN 3
-                        WHEN 'Thursday' THEN 4
-                        WHEN 'Friday' THEN 5
-                        WHEN 'Saturday' THEN 6
-                        WHEN 'Sunday' THEN 7
-                        ELSE 8
-                    END,
+                        WHEN 'Monday' THEN 1 WHEN 'Tuesday' THEN 2 WHEN 'Wednesday' THEN 3
+                        WHEN 'Thursday' THEN 4 WHEN 'Friday' THEN 5 WHEN 'Saturday' THEN 6
+                        WHEN 'Sunday' THEN 7 ELSE 8 END,
                     a.start_time
                 """;
 
-        List<Availability> availabilityList = new ArrayList<>();
-
+        List<Availability> result = new ArrayList<>();
         try (Connection connection = DatabaseConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
-
             statement.setInt(1, tutorId);
-
             try (ResultSet rs = statement.executeQuery()) {
-                while (rs.next()) {
-                    availabilityList.add(map(rs));
-                }
+                while (rs.next()) result.add(map(rs));
             }
         }
-
-        return availabilityList;
+        return result;
     }
 
     public List<SubjectOption> findSubjectsByTutorId(int tutorId) throws SQLException {
-        String sql = "SELECT subject_id, subject_name FROM subjects ORDER BY subject_name ASC";
-
-        List<SubjectOption> subjects = new ArrayList<>();
-
-        try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql);
-             ResultSet rs = statement.executeQuery()) {
-
-            while (rs.next()) {
-                subjects.add(new SubjectOption(
-                        rs.getInt("subject_id"),
-                        rs.getString("subject_name")
-                ));
-            }
+        List<SubjectOption> result = new ArrayList<>();
+        for (TutorSubjectRepository.SubjectOption option : tutorSubjectRepository.findSubjectsByTutorId(tutorId)) {
+            result.add(new SubjectOption(option.getId(), option.getName()));
         }
-
-        return subjects;
+        return result;
     }
 
     public boolean tutorTeachesSubject(int tutorId, int subjectId) throws SQLException {
-        return true;
+        return tutorSubjectRepository.tutorTeachesSubject(tutorId, subjectId);
     }
 
     public boolean isAvailable(int tutorId, LocalDate date, LocalTime time, int durationMinutes) throws SQLException {
-        if (tutorId <= 0 || date == null || time == null || durationMinutes <= 0) {
-            return false;
-        }
-
+        if (tutorId <= 0 || date == null || time == null || durationMinutes <= 0) return false;
         String dayOfWeek = convertDay(date.getDayOfWeek());
         LocalTime requestedEnd = time.plusMinutes(durationMinutes);
-
-        if (requestedEnd.isBefore(time)) {
-            return false;
-        }
+        if (!time.isBefore(requestedEnd)) return false;
 
         String sql = """
-                SELECT COUNT(*)
-                FROM availability
-                WHERE tutor_id = ?
-                  AND day_of_week = ?
-                  AND status = 'Available'
-                  AND start_time <= ?
-                  AND end_time >= ?
+                SELECT COUNT(*) FROM availability
+                WHERE tutor_id = ? AND day_of_week = ? AND status = 'Available'
+                  AND start_time <= ? AND end_time >= ?
                 """;
-
         try (Connection connection = DatabaseConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
-
             statement.setInt(1, tutorId);
             statement.setString(2, dayOfWeek);
             statement.setTime(3, Time.valueOf(time));
             statement.setTime(4, Time.valueOf(requestedEnd));
+            try (ResultSet rs = statement.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
+            }
+        }
+    }
 
+    public boolean isAvailable(int tutorId, int subjectId, LocalDate date,
+                               LocalTime time, int durationMinutes) throws SQLException {
+        if (tutorId <= 0 || subjectId <= 0 || date == null || time == null || durationMinutes <= 0) return false;
+        String dayOfWeek = convertDay(date.getDayOfWeek());
+        LocalTime requestedEnd = time.plusMinutes(durationMinutes);
+        if (!time.isBefore(requestedEnd)) return false;
+
+        String sql = """
+                SELECT COUNT(*) FROM availability
+                WHERE tutor_id = ? AND subject_id = ? AND day_of_week = ?
+                  AND status = 'Available' AND start_time <= ? AND end_time >= ?
+                """;
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, tutorId);
+            statement.setInt(2, subjectId);
+            statement.setString(3, dayOfWeek);
+            statement.setTime(4, Time.valueOf(time));
+            statement.setTime(5, Time.valueOf(requestedEnd));
+            try (ResultSet rs = statement.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
+            }
+        }
+    }
+
+    public boolean overlapsExistingAvailability(int tutorId, String dayOfWeek,
+                                                LocalTime startTime, LocalTime endTime,
+                                                int ignoredAvailabilityId) throws SQLException {
+        String sql = """
+                SELECT COUNT(*) FROM availability
+                WHERE tutor_id = ? AND day_of_week = ? AND status = 'Available'
+                  AND availability_id <> ?
+                  AND start_time < ? AND end_time > ?
+                """;
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, tutorId);
+            statement.setString(2, dayOfWeek);
+            statement.setInt(3, ignoredAvailabilityId);
+            statement.setTime(4, Time.valueOf(endTime));
+            statement.setTime(5, Time.valueOf(startTime));
             try (ResultSet rs = statement.executeQuery()) {
                 return rs.next() && rs.getInt(1) > 0;
             }
@@ -171,10 +177,8 @@ public class AvailabilityRepository {
 
     public boolean delete(int availabilityId) throws SQLException {
         String sql = "DELETE FROM availability WHERE availability_id = ?";
-
         try (Connection connection = DatabaseConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
-
             statement.setInt(1, availabilityId);
             return statement.executeUpdate() > 0;
         }
@@ -182,38 +186,41 @@ public class AvailabilityRepository {
 
     public boolean updateStatus(int availabilityId, String status) throws SQLException {
         String sql = "UPDATE availability SET status = ? WHERE availability_id = ?";
-
         try (Connection connection = DatabaseConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
-
             statement.setString(1, status);
             statement.setInt(2, availabilityId);
             return statement.executeUpdate() > 0;
         }
     }
 
+    public List<SubjectOption> findAllSubjects() throws SQLException {
+        String sql = "SELECT subject_id, subject_name FROM subjects ORDER BY subject_name ASC";
+        List<SubjectOption> result = new ArrayList<>();
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet rs = statement.executeQuery()) {
+            while (rs.next()) {
+                result.add(new SubjectOption(rs.getInt("subject_id"), rs.getString("subject_name")));
+            }
+        }
+        return result;
+    }
+
     private Availability map(ResultSet rs) throws SQLException {
-        Availability availability = new Availability();
-        availability.setAvailabilityId(rs.getInt("availability_id"));
-        availability.setTutorId(rs.getInt("tutor_id"));
-        availability.setSubjectId(rs.getInt("subject_id"));
-        availability.setSubjectName(rs.getString("subject_name"));
-        availability.setDayOfWeek(rs.getString("day_of_week"));
-
+        Availability a = new Availability();
+        a.setAvailabilityId(rs.getInt("availability_id"));
+        a.setTutorId(rs.getInt("tutor_id"));
+        a.setSubjectId(rs.getInt("subject_id"));
+        a.setSubjectName(rs.getString("subject_name"));
+        a.setDayOfWeek(rs.getString("day_of_week"));
         Time start = rs.getTime("start_time");
-        if (start != null) {
-            availability.setStartTime(start.toLocalTime());
-        }
-
         Time end = rs.getTime("end_time");
-        if (end != null) {
-            availability.setEndTime(end.toLocalTime());
-        }
-
-        availability.setDescription(rs.getString("description"));
-        availability.setStatus(rs.getString("status"));
-
-        return availability;
+        if (start != null) a.setStartTime(start.toLocalTime());
+        if (end != null) a.setEndTime(end.toLocalTime());
+        a.setDescription(rs.getString("description"));
+        a.setStatus(rs.getString("status"));
+        return a;
     }
 
     private String convertDay(DayOfWeek day) {
@@ -233,71 +240,16 @@ public class AvailabilityRepository {
         public String getName() { return name; }
 
         @Override
-        public String toString() {
-            return name;
-        }
+        public String toString() { return name; }
 
         @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            SubjectOption option = (SubjectOption) o;
+        public boolean equals(Object other) {
+            if (this == other) return true;
+            if (!(other instanceof SubjectOption option)) return false;
             return id == option.id;
         }
 
         @Override
-        public int hashCode() {
-            return Integer.hashCode(id);
-        }
-    }
-
-    public int findOrCreateSubject(String subjectName, int tutorId) throws SQLException {
-        String cleanName = subjectName.trim();
-        int subjectId = -1;
-
-        String selectSql = "SELECT subject_id FROM subjects WHERE LOWER(subject_name) = LOWER(?)";
-        try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(selectSql)) {
-            statement.setString(1, cleanName);
-            try (ResultSet rs = statement.executeQuery()) {
-                if (rs.next()) {
-                    subjectId = rs.getInt("subject_id");
-                }
-            }
-        }
-
-        if (subjectId == -1) {
-            String insertSql = "INSERT INTO subjects (subject_name) VALUES (?)";
-            try (Connection connection = DatabaseConnection.getConnection();
-                 PreparedStatement statement = connection.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
-                statement.setString(1, cleanName);
-                statement.executeUpdate();
-                try (ResultSet keys = statement.getGeneratedKeys()) {
-                    if (keys.next()) {
-                        subjectId = keys.getInt(1);
-                    }
-                }
-            }
-        }
-
-        return subjectId;
-    }
-
-    public List<SubjectOption> findAllSubjects() throws SQLException {
-        String sql = "SELECT subject_id, subject_name FROM subjects ORDER BY subject_name ASC";
-        List<SubjectOption> subjects = new ArrayList<>();
-
-        try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql);
-             ResultSet rs = statement.executeQuery()) {
-
-            while (rs.next()) {
-                subjects.add(new SubjectOption(
-                    rs.getInt("subject_id"),
-                    rs.getString("subject_name")
-                ));
-            }
-        }
-        return subjects;
+        public int hashCode() { return Integer.hashCode(id); }
     }
 }

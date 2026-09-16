@@ -2,6 +2,7 @@ package com.tutorly.service;
 
 import com.tutorly.model.Availability;
 import com.tutorly.repository.AvailabilityRepository;
+import com.tutorly.repository.TutorSubjectRepository;
 
 import java.sql.SQLException;
 import java.time.LocalTime;
@@ -10,9 +11,11 @@ import java.util.List;
 public class AvailabilityService {
 
     private final AvailabilityRepository repository;
+    private final TutorSubjectRepository tutorSubjectRepository;
 
     public AvailabilityService() {
         repository = new AvailabilityRepository();
+        tutorSubjectRepository = new com.tutorly.repository.TutorSubjectRepository();
     }
 
     public List<Availability> getTutorAvailability(
@@ -68,6 +71,13 @@ public class AvailabilityService {
             );
         }
 
+        if (repository.overlapsExistingAvailability(
+                tutorId, day, start, end, -1)) {
+            throw new IllegalArgumentException(
+                    "This time overlaps another available slot on " + day + "."
+            );
+        }
+
         Availability availability =
                 new Availability();
 
@@ -118,6 +128,13 @@ public class AvailabilityService {
 
             throw new IllegalArgumentException(
                     "You can only select a subject that you teach."
+            );
+        }
+
+        if (repository.overlapsExistingAvailability(
+                tutorId, day, start, end, availabilityId)) {
+            throw new IllegalArgumentException(
+                    "This time overlaps another available slot on " + day + "."
             );
         }
 
@@ -187,6 +204,20 @@ public class AvailabilityService {
                     "Description must be 500 characters or less."
             );
         }
+    }
+
+    public int addTutorSubject(int tutorId, String subjectName) throws SQLException {
+        if (tutorId <= 0) {
+            throw new IllegalArgumentException("Invalid tutor ID.");
+        }
+        return tutorSubjectRepository.addSubject(tutorId, subjectName);
+    }
+
+    public void removeTutorSubject(int tutorId, int subjectId) throws SQLException {
+        if (tutorId <= 0 || subjectId <= 0) {
+            throw new IllegalArgumentException("Invalid tutor or subject.");
+        }
+        tutorSubjectRepository.removeSubject(tutorId, subjectId);
     }
 
     public void deleteAvailability(

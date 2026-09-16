@@ -10,93 +10,93 @@
             styleClass="root">
 
     <top>
-
-        <HBox spacing="15"
-              alignment="CENTER_LEFT"
-              styleClass="top-bar">
-
+        <HBox spacing="18" alignment="CENTER_LEFT" styleClass="top-bar">
             <padding>
-                <Insets top="18"
-                        right="30"
-                        bottom="18"
-                        left="30"/>
+                <Insets top="16" right="28" bottom="16" left="28"/>
             </padding>
-
-            <Button text="← Back"
-                    onAction="#handleBack"
-                    styleClass="text-button"/>
-
-            <Label text="Find Tutors"
-                   styleClass="app-title"/>
-
+            <Button text="← Back" onAction="#handleBack" styleClass="text-button"/>
+            <Label text="Find a Tutor" styleClass="app-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="resultCountLabel" text="" styleClass="dashboard-subtitle"/>
         </HBox>
-
     </top>
 
     <center>
-
-        <VBox spacing="18">
-
+        <VBox spacing="16">
             <padding>
-                <Insets top="30"
-                        right="40"
-                        bottom="30"
-                        left="40"/>
+                <Insets top="22" right="28" bottom="28" left="28"/>
             </padding>
 
-            <Label text="Find the right tutor"
-                   styleClass="page-title"/>
+            <VBox spacing="4">
+                <Label text="Find the right tutor" styleClass="page-title"/>
+                <Label text="Search by subject, hourly rate, experience or teaching day. Then select a tutor and request recurring weekly classes." styleClass="dashboard-subtitle" wrapText="true"/>
+            </VBox>
 
-            <HBox spacing="12">
+            <VBox spacing="12" styleClass="filter-panel">
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <TextField fx:id="keywordField" promptText="Search tutor name, qualification or bio" HBox.hgrow="ALWAYS"/>
+                    <Button text="Search" onAction="#handleSearch" styleClass="primary-button"/>
+                    <Button text="Clear" onAction="#handleClearFilters" styleClass="secondary-button"/>
+                </HBox>
 
-                <TextField fx:id="subjectField"
-                           promptText="Search by subject"
-                           HBox.hgrow="ALWAYS"/>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <ComboBox fx:id="subjectComboBox" promptText="Subject" prefWidth="190" HBox.hgrow="NEVER"/>
+                    <TextField fx:id="minRateField" promptText="Min rate (BDT/hour)" prefWidth="150"/>
+                    <TextField fx:id="maxRateField" promptText="Max rate (BDT/hour)" prefWidth="150"/>
+                    <TextField fx:id="minExperienceField" promptText="Min experience (years)" prefWidth="165"/>
+                    <ComboBox fx:id="dayComboBox" promptText="Teaching day" prefWidth="155" HBox.hgrow="NEVER"/>
+                </HBox>
+            </VBox>
 
-                <Button text="Search"
-                        onAction="#handleSearch"
-                        styleClass="primary-button"/>
-
-            </HBox>
-
-            <SplitPane dividerPositions="0.35">
-
-                <ListView fx:id="tutorList"
-                          onMouseClicked="#handleTutorSelected"/>
-
-                <ScrollPane fitToWidth="true">
-
-                    <VBox spacing="15">
-
+            <SplitPane dividerPositions="0.43" VBox.vgrow="ALWAYS">
+                <ScrollPane fitToWidth="true" styleClass="content-scroll">
+                    <VBox spacing="12" fx:id="tutorCardsBox">
                         <padding>
-                            <Insets top="20"
-                                    right="20"
-                                    bottom="20"
-                                    left="20"/>
+                            <Insets top="4" right="10" bottom="10" left="4"/>
                         </padding>
-
-                        <Label text="Tutor Details"
-                               styleClass="card-title"/>
-
-                        <Label fx:id="detailsLabel"
-                               text="Select a tutor to view details."
-                               wrapText="true"/>
-
-                        <Button text="Book This Tutor"
-                                onAction="#handleBookTutor"
-                                styleClass="primary-button"/>
-
-                        <Label fx:id="messageLabel"
-                               wrapText="true"/>
-
                     </VBox>
-
                 </ScrollPane>
 
+                <ScrollPane fitToWidth="true" styleClass="content-scroll">
+                    <VBox spacing="14" styleClass="detail-panel">
+                        <padding>
+                            <Insets top="8" right="14" bottom="14" left="14"/>
+                        </padding>
+
+                        <VBox spacing="4">
+                            <Label fx:id="selectedTutorNameLabel" text="Select a tutor" styleClass="selected-tutor-name"/>
+                            <Label fx:id="selectedTutorMetaLabel" text="Tutor details will appear here." styleClass="dashboard-subtitle" wrapText="true"/>
+                        </VBox>
+
+                        <Separator/>
+
+                        <Label fx:id="selectedTutorSubjectsLabel" text="Subjects: —" styleClass="card-title" wrapText="true"/>
+                        <Label fx:id="selectedTutorBioLabel" text="—" wrapText="true" styleClass="card-description"/>
+
+                        <VBox spacing="8" styleClass="schedule-panel">
+                            <Label text="Available weekly slots" styleClass="card-title"/>
+                            <Label text="These are the tutor's actual available slots. Each selected slot repeats weekly." styleClass="card-description" wrapText="true"/>
+                            <VBox fx:id="availabilityBox" spacing="8"/>
+                        </VBox>
+
+                        <VBox spacing="10" styleClass="request-panel">
+                            <Label text="Request classes" styleClass="card-title"/>
+                            <Label text="One request can contain multiple weekly slots. The number below is applied to each selected slot." styleClass="card-description" wrapText="true"/>
+
+                            <GridPane hgap="10" vgap="8">
+                                <Label text="Start date" styleClass="field-label" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                                <DatePicker fx:id="startDatePicker" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                                <Label text="Classes per selected slot" styleClass="field-label" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                                <Spinner fx:id="classesSpinner" editable="true" prefWidth="110" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                            </GridPane>
+
+                            <Label fx:id="bookingSummaryLabel" text="Select a tutor and one or more weekly slots." wrapText="true" styleClass="dashboard-subtitle"/>
+                            <Button fx:id="requestButton" text="Request Classes" onAction="#handleRequestClasses" styleClass="primary-button"/>
+                            <Label fx:id="messageLabel" wrapText="true" styleClass="status-label"/>
+                        </VBox>
+                    </VBox>
+                </ScrollPane>
             </SplitPane>
-
         </VBox>
-
     </center>
-
 </BorderPane>

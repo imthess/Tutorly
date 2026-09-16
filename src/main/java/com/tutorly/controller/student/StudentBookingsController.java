@@ -4,6 +4,9 @@ import com.tutorly.model.BookingDetails;
 import com.tutorly.model.Student;
 import com.tutorly.service.BookingService;
 import com.tutorly.service.StudentService;
+import com.tutorly.service.OnlineClassService;
+import com.tutorly.patterns.facade.LiveClassFacade;
+import com.tutorly.model.OnlineClass;
 import com.tutorly.util.Navigator;
 import com.tutorly.util.Session;
 
@@ -45,6 +48,9 @@ public class StudentBookingsController {
 
     private final StudentService studentService =
             new StudentService();
+
+    private final OnlineClassService onlineClassService =
+            new OnlineClassService();
 
     @FXML
     private void initialize() {
@@ -140,6 +146,43 @@ public class StudentBookingsController {
             messageLabel.setText(
                     "Unable to load bookings."
             );
+        }
+    }
+
+
+    @FXML
+    private void handleJoinOnlineClass() {
+        try {
+            BookingDetails selected = bookingTable.getSelectionModel().getSelectedItem();
+            if (selected == null) {
+                messageLabel.setText("Select an accepted booking first.");
+                return;
+            }
+            if (!"Accepted".equalsIgnoreCase(selected.getStatus())) {
+                messageLabel.setText("Only accepted bookings can join an online class.");
+                return;
+            }
+
+            OnlineClass onlineClass =
+                    onlineClassService.findByBookingId(selected.getBookingId());
+
+            if (!onlineClassService.isRunning(onlineClass)) {
+                messageLabel.setText("The tutor has not started this class yet.");
+                return;
+            }
+
+            String link = onlineClass.getMeetingLink();
+            if (link == null || link.isBlank()) {
+                messageLabel.setText("The classroom link is unavailable.");
+                return;
+            }
+
+            LiveClassFacade liveClassFacade = new LiveClassFacade(Session.getCurrentUser(), link);
+            liveClassFacade.joinClass();
+            messageLabel.setText("Tutorly live classroom opened.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            messageLabel.setText("Unable to join the online class.");
         }
     }
 

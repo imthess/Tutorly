@@ -37,6 +37,13 @@
             <version>${javafx.version}</version>
         </dependency>
 
+        <!-- JavaCV/OpenCV for real webcam capture -->
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>javacv-platform</artifactId>
+            <version>1.5.10</version>
+        </dependency>
+
         <!-- MySQL JDBC -->
         <dependency>
             <groupId>com.mysql</groupId>

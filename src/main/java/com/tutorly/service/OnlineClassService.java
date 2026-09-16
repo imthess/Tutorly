@@ -12,137 +12,117 @@ public class OnlineClassService {
     private final OnlineClassRepository onlineClassRepository;
 
     public OnlineClassService() {
-        onlineClassRepository =
-                new OnlineClassRepository();
+        onlineClassRepository = new OnlineClassRepository();
     }
 
-    /**
-     * Creates a scheduled online class for a booking.
-     */
-    public OnlineClass createClass(
-            int bookingId
-    ) throws SQLException {
+    public OnlineClass createClass(int bookingId) throws SQLException {
+        OnlineClass existing = findByBookingId(bookingId);
+        if (existing != null) {
+            return existing;
+        }
 
-        OnlineClass onlineClass =
-                new OnlineClass();
-
+        OnlineClass onlineClass = new OnlineClass();
         onlineClass.setBookingId(bookingId);
-
-        onlineClass.setMeetingLink(
-                generateMeetingLink()
-        );
-
+        onlineClass.setMeetingLink(generateMeetingLink());
         onlineClass.setStatus("Scheduled");
-
-        onlineClassRepository.create(
-                onlineClass
-        );
-
+        onlineClassRepository.create(onlineClass);
         return onlineClass;
     }
 
     /**
-     * Starts an existing online class.
+     * Starts an occurrence immediately, regardless of its scheduled calendar
+     * date.  The controller is responsible for selecting the exact accepted
+     * occurrence.  Completed classes are immutable and cannot be restarted.
      */
-    public boolean startClass(
-            int classId
+    public OnlineClass startClassWithMeetingLink(
+            int bookingId,
+            String meetingLink,
+            LocalDateTime startedAt
     ) throws SQLException {
 
-        OnlineClass onlineClass =
-                onlineClassRepository.findById(classId);
+        OnlineClass onlineClass = createClass(bookingId);
 
-        if (onlineClass == null) {
+        if ("Completed".equalsIgnoreCase(onlineClass.getStatus())) {
+            throw new IllegalStateException(
+                    "This online class has already been completed."
+            );
+        }
+
+        if (isRunning(onlineClass)) {
+            return onlineClass;
+        }
+
+        if (!"Scheduled".equalsIgnoreCase(onlineClass.getStatus())) {
+            throw new IllegalStateException(
+                    "This online class is not available to start."
+            );
+        }
+
+        if (meetingLink == null || meetingLink.isBlank()) {
+            throw new IllegalArgumentException("A classroom link is required.");
+        }
+        if (startedAt == null) {
+            throw new IllegalArgumentException("A class start time is required.");
+        }
+
+        onlineClass.setMeetingLink(meetingLink);
+        onlineClass.setStartTime(startedAt);
+        onlineClass.setEndTime(null);
+        onlineClass.setStatus("Scheduled");
+        onlineClassRepository.updateClass(onlineClass);
+        return onlineClass;
+    }
+
+    public boolean startClass(int classId) throws SQLException {
+        OnlineClass onlineClass = onlineClassRepository.findById(classId);
+        if (onlineClass == null
+                || !"Scheduled".equalsIgnoreCase(onlineClass.getStatus())
+                || onlineClass.getStartTime() != null) {
             return false;
         }
 
-        if (!"Scheduled".equalsIgnoreCase(
-                onlineClass.getStatus())) {
-
-            return false;
-        }
-
-        onlineClass.setStartTime(
-                LocalDateTime.now()
-        );
-
-        return updateClass(
-                onlineClass
-        );
+        onlineClass.setStartTime(LocalDateTime.now());
+        return updateClass(onlineClass);
     }
 
     /**
-     * Completes an online class.
+     * Completing the online class records the actual end time and makes the
+     * occurrence permanently non-runnable.
      */
-    public boolean endClass(
-            int classId
-    ) throws SQLException {
-
-        OnlineClass onlineClass =
-                onlineClassRepository.findById(classId);
-
-        if (onlineClass == null) {
+    public boolean endClass(int classId) throws SQLException {
+        OnlineClass onlineClass = onlineClassRepository.findById(classId);
+        if (onlineClass == null
+                || !"Scheduled".equalsIgnoreCase(onlineClass.getStatus())
+                || onlineClass.getStartTime() == null
+                || onlineClass.getEndTime() != null) {
             return false;
         }
 
-        if (!"Scheduled".equalsIgnoreCase(
-                onlineClass.getStatus())) {
-
-            return false;
-        }
-
-        onlineClass.setEndTime(
-                LocalDateTime.now()
-        );
-
+        onlineClass.setEndTime(LocalDateTime.now());
         onlineClass.setStatus("Completed");
-
-        return updateClass(
-                onlineClass
-        );
+        return updateClass(onlineClass);
     }
 
-    /**
-     * Finds an online class by booking ID.
-     */
-    public OnlineClass findByBookingId(
-            int bookingId
-    ) throws SQLException {
-
-        return onlineClassRepository.findByBookingId(
-                bookingId
-        );
+    public OnlineClass findByBookingId(int bookingId) throws SQLException {
+        return onlineClassRepository.findByBookingId(bookingId);
     }
 
-    /**
-     * Finds an online class by class ID.
-     */
-    public OnlineClass findById(
-            int classId
-    ) throws SQLException {
-
-        return onlineClassRepository.findById(
-                classId
-        );
+    public OnlineClass findById(int classId) throws SQLException {
+        return onlineClassRepository.findById(classId);
     }
 
-    /**
-     * Persists the current online-class state.
-     */
-    private boolean updateClass(
-            OnlineClass onlineClass
-    ) throws SQLException {
-
-        return onlineClassRepository.updateClass(
-                onlineClass
-        );
+    public boolean isRunning(OnlineClass onlineClass) {
+        return onlineClass != null
+                && "Scheduled".equalsIgnoreCase(onlineClass.getStatus())
+                && onlineClass.getStartTime() != null
+                && onlineClass.getEndTime() == null;
     }
 
-    /**
-     * Generates a unique meeting link.
-     */
+    private boolean updateClass(OnlineClass onlineClass) throws SQLException {
+        return onlineClassRepository.updateClass(onlineClass);
+    }
+
     private String generateMeetingLink() {
-
-        return "tutorly://class/"
-                + UUID.randomUUID();
+        return "https://meet.jit.si/Tutorly-" + UUID.randomUUID();
     }
 }

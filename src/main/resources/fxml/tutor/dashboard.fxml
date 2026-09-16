@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
@@ -8,131 +7,55 @@
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.tutorly.controller.tutor.TutorDashboardController"
             styleClass="root">
-
     <top>
-
-        <HBox alignment="CENTER_LEFT"
-              spacing="20"
-              styleClass="top-bar">
-
-            <padding>
-                <Insets top="18"
-                        right="30"
-                        bottom="18"
-                        left="30"/>
-            </padding>
-
-            <Label text="Tutorly"
-                   styleClass="app-title"/>
-
+        <HBox alignment="CENTER_LEFT" spacing="18" styleClass="top-bar">
+            <padding><Insets top="18" right="30" bottom="18" left="30"/></padding>
+            <Label text="Tutorly" styleClass="app-title"/>
             <Region HBox.hgrow="ALWAYS"/>
-
-            <Button text="My Profile"
-                    onAction="#handleProfile"
-                    styleClass="nav-button"/>
-
-            <Button text="Logout"
-                    onAction="#handleLogout"
-                    styleClass="text-button"/>
-
+            <Button text="Notifications" onAction="#handleNotifications" styleClass="nav-button"/>
+            <Button text="My Profile" onAction="#handleProfile" styleClass="nav-button"/>
+            <Button text="Logout" onAction="#handleLogout" styleClass="text-button"/>
         </HBox>
-
     </top>
-
     <center>
-
         <VBox spacing="25">
+            <padding><Insets top="35" right="45" bottom="35" left="45"/></padding>
+            <Label text="Tutor Dashboard" styleClass="page-title"/>
+            <Label fx:id="welcomeLabel" text="Welcome" styleClass="section-title"/>
+            <Label fx:id="profileStatusLabel" text="Loading profile..." wrapText="true" styleClass="dashboard-subtitle"/>
 
-            <padding>
-                <Insets top="35"
-                        right="45"
-                        bottom="35"
-                        left="45"/>
-            </padding>
-
-            <Label text="Tutor Dashboard"
-                   styleClass="page-title"/>
-
-            <Label fx:id="welcomeLabel"
-                   text="Welcome"
-                   styleClass="section-title"/>
-
-            <Label fx:id="profileStatusLabel"
-                   text="Loading profile..."
-                   wrapText="true"/>
-
-            <GridPane hgap="20"
-                      vgap="20">
-
-                <VBox GridPane.columnIndex="0"
-                      GridPane.rowIndex="0"
-                      spacing="12"
-                      styleClass="dashboard-card">
-
-                    <Label text="Availability"
-                           styleClass="card-title"/>
-
-                    <Label text="Set the days and hours when students can book you."
-                           wrapText="true"/>
-
-                    <Button text="Manage Availability"
-                            onAction="#handleAvailability"
-                            styleClass="primary-button"/>
-
+            <HBox spacing="20">
+                <VBox spacing="12" styleClass="dashboard-card" HBox.hgrow="ALWAYS">
+                    <Label text="Subjects &amp; Availability" styleClass="card-title"/>
+                    <Label text="Add or remove subjects, create weekly teaching slots, update descriptions, and enable or disable availability." wrapText="true"/>
+                    <Button text="Manage Subjects &amp; Availability" onAction="#handleAvailability" styleClass="primary-button"/>
                 </VBox>
-
-                <VBox GridPane.columnIndex="1"
-                      GridPane.rowIndex="0"
-                      spacing="12"
-                      styleClass="dashboard-card">
-
-                    <Label text="Booking Requests"
-                           styleClass="card-title"/>
-
-                    <Label text="Review student booking requests and accept or reject them."
-                           wrapText="true"/>
-
-                    <Button text="Manage Bookings"
-                            styleClass="primary-button"/>
-
+                <VBox spacing="12" styleClass="dashboard-card" HBox.hgrow="ALWAYS">
+                    <Label text="Booking Requests" styleClass="card-title"/>
+                    <Label text="Review pending students and accept or reject their requested classes." wrapText="true"/>
+                    <Label fx:id="bookingSummaryLabel" text="Loading booking summary..." wrapText="true"/>
+                    <Button text="Manage Booking Requests" onAction="#handleBookings" styleClass="primary-button"/>
                 </VBox>
+            </HBox>
 
-                <VBox GridPane.columnIndex="0"
-                      GridPane.rowIndex="1"
-                      spacing="12"
-                      styleClass="dashboard-card">
-
-                    <Label text="Online Classes"
-                           styleClass="card-title"/>
-
-                    <Label text="Open your scheduled online classes."
-                           wrapText="true"/>
-
-                    <Button text="Online Classes"
-                            onAction="#handleOnlineClasses"/>
-
+            <HBox spacing="20">
+                <VBox spacing="12" styleClass="dashboard-card" HBox.hgrow="ALWAYS">
+                    <Label text="Notifications" styleClass="card-title"/>
+                    <Label fx:id="notificationSummaryLabel" text="Loading notifications..." wrapText="true"/>
+                    <Button text="View Notifications" onAction="#handleNotifications" styleClass="secondary-button"/>
                 </VBox>
-
-                <VBox GridPane.columnIndex="1"
-                      GridPane.rowIndex="1"
-                      spacing="12"
-                      styleClass="dashboard-card">
-
-                    <Label text="Profile"
-                           styleClass="card-title"/>
-
-                    <Label text="Update your qualifications, experience, hourly rate and bio."
-                           wrapText="true"/>
-
-                    <Button text="View / Edit Profile"
-                            onAction="#handleProfile"/>
-
+                <VBox spacing="12" styleClass="dashboard-card" HBox.hgrow="ALWAYS">
+                    <Label text="Online Classes" styleClass="card-title"/>
+                    <Label text="Open the live classroom tools for your accepted sessions." wrapText="true"/>
+                    <Button text="Online Classes" onAction="#handleOnlineClasses" styleClass="secondary-button"/>
                 </VBox>
+            </HBox>
 
-            </GridPane>
-
+            <VBox spacing="12" styleClass="dashboard-card">
+                <Label text="Tutor Profile" styleClass="card-title"/>
+                <Label text="Keep your qualifications, experience, hourly rate and biography up to date." wrapText="true"/>
+                <Button text="View / Edit Profile" onAction="#handleProfile"/>
+            </VBox>
         </VBox>
-
     </center>
-
 </BorderPane>

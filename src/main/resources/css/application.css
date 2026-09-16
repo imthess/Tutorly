@@ -310,3 +310,95 @@
     -fx-padding: 15px;
     -fx-alignment: center;
 }
+/* =========================================================
+   STUDENT TUTOR DISCOVERY / BOOKING
+   ========================================================= */
+
+.filter-panel {
+    -fx-background-color: #ffffff;
+    -fx-padding: 16px;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+}
+
+.content-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.content-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.tutor-result-card {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-cursor: hand;
+}
+
+.tutor-result-card:hover {
+    -fx-border-color: #c7d2fe;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 3);
+}
+
+.tutor-card-name {
+    -fx-font-size: 19px;
+    -fx-font-weight: bold;
+}
+
+.tutor-card-subtitle {
+    -fx-font-size: 13px;
+    -fx-text-fill: #6b7280;
+}
+
+.tutor-card-stats {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.tutor-card-detail {
+    -fx-font-size: 13px;
+    -fx-text-fill: #4b5563;
+}
+
+.detail-panel {
+    -fx-background-color: #ffffff;
+    -fx-padding: 18px;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+}
+
+.selected-tutor-name {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+}
+
+.schedule-panel,
+.request-panel {
+    -fx-background-color: #f9fafb;
+    -fx-padding: 15px;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+}
+
+.availability-check {
+    -fx-background-color: #ffffff;
+    -fx-padding: 10px;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.availability-check:selected {
+    -fx-border-color: #9ca3af;
+}

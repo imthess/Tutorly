@@ -10,137 +10,88 @@
             styleClass="root">
 
     <top>
-
-        <HBox spacing="15"
-              alignment="CENTER_LEFT"
-              styleClass="top-bar">
-
+        <HBox spacing="15" alignment="CENTER_LEFT" styleClass="top-bar">
             <padding>
-                <Insets top="18"
-                        right="30"
-                        bottom="18"
-                        left="30"/>
+                <Insets top="18" right="30" bottom="18" left="30"/>
             </padding>
-
-            <Button text="← Back"
-                    onAction="#handleBack"
-                    styleClass="text-button"/>
-
-            <Label text="Manage Availability"
-                   styleClass="app-title"/>
-
+            <Button text="← Back" onAction="#handleBack" styleClass="text-button"/>
+            <Label text="Manage Subjects &amp; Availability" styleClass="app-title"/>
         </HBox>
-
     </top>
 
     <center>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER">
+            <content>
+                <VBox spacing="22">
+                    <padding>
+                        <Insets top="30" right="40" bottom="30" left="40"/>
+                    </padding>
 
-        <VBox spacing="22">
+                    <VBox spacing="8" styleClass="dashboard-card">
+                        <Label text="Subjects I Teach" styleClass="card-title"/>
+                        <Label text="Add a new subject by typing its name. New subjects are saved to the shared subject catalogue and immediately become available in search and availability forms." wrapText="true"/>
 
-            <padding>
-                <Insets top="30"
-                        right="40"
-                        bottom="30"
-                        left="40"/>
-            </padding>
+                        <HBox spacing="10">
+                            <TextField fx:id="newSubjectField" promptText="e.g. Machine Learning, C++, Accounting" HBox.hgrow="ALWAYS"/>
+                            <Button text="Add Subject" onAction="#handleAddSubject" styleClass="primary-button"/>
+                        </HBox>
 
-            <Label text="Set your teaching schedule"
-                   styleClass="page-title"/>
+                        <ListView fx:id="assignedSubjectsList" prefHeight="120"/>
 
-            <GridPane hgap="12"
-                      vgap="12">
+                        <HBox spacing="10">
+                            <Button text="Remove Selected Subject" onAction="#handleRemoveSubject" styleClass="secondary-button"/>
+                            <Label fx:id="subjectMessageLabel" wrapText="true"/>
+                        </HBox>
+                    </VBox>
 
-                <columnConstraints>
-                    <ColumnConstraints hgrow="ALWAYS"/>
-                    <ColumnConstraints hgrow="ALWAYS"/>
-                    <ColumnConstraints hgrow="ALWAYS"/>
-                    <ColumnConstraints hgrow="ALWAYS"/>
-                </columnConstraints>
+                    <VBox spacing="8">
+                        <Label text="Set Your Teaching Schedule" styleClass="page-title"/>
+                        <Label text="Every slot is tied to one of your subjects and can be selected by students when they request recurring classes." wrapText="true"/>
+                    </VBox>
 
-                <ComboBox fx:id="dayComboBox"
-                          promptText="Day"
-                          GridPane.columnIndex="0"/>
+                    <GridPane hgap="12" vgap="12">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="ALWAYS"/>
+                            <ColumnConstraints hgrow="ALWAYS"/>
+                            <ColumnConstraints hgrow="ALWAYS"/>
+                            <ColumnConstraints hgrow="ALWAYS"/>
+                        </columnConstraints>
 
-                <ComboBox fx:id="subjectComboBox"
-                          promptText="Subject"
-                          GridPane.columnIndex="1"/>
+                        <ComboBox fx:id="dayComboBox" promptText="Day" GridPane.columnIndex="0"/>
+                        <ComboBox fx:id="subjectComboBox" promptText="Subject" GridPane.columnIndex="1"/>
+                        <ComboBox fx:id="startComboBox" promptText="Start" GridPane.columnIndex="2"/>
+                        <ComboBox fx:id="endComboBox" promptText="End" GridPane.columnIndex="3"/>
 
-                <ComboBox fx:id="startComboBox"
-                          promptText="Start"
-                          GridPane.columnIndex="2"/>
+                        <TextArea fx:id="descriptionField"
+                                  promptText="What will you teach during this time?"
+                                  prefHeight="70" wrapText="true"
+                                  GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.columnSpan="3"/>
 
-                <ComboBox fx:id="endComboBox"
-                          promptText="End"
-                          GridPane.columnIndex="3"/>
+                        <Button fx:id="saveButton" text="Add Availability"
+                                onAction="#handleSaveAvailability" styleClass="secondary-button"
+                                GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+                    </GridPane>
 
-                <TextArea fx:id="descriptionField"
-                          promptText="What will you teach during this time?"
-                          prefHeight="70"
-                          wrapText="true"
-                          GridPane.columnIndex="0"
-                          GridPane.rowIndex="1"
-                          GridPane.columnSpan="3"/>
+                    <Label fx:id="messageLabel" wrapText="true"/>
 
-                <Button fx:id="saveButton"
-                        text="Add Availability"
-                        onAction="#handleSaveAvailability"
-                        styleClass="secondary-button"
-                        GridPane.columnIndex="3"
-                        GridPane.rowIndex="1"/>
+                    <TableView fx:id="availabilityTable" VBox.vgrow="ALWAYS" prefHeight="380">
+                        <columns>
+                            <TableColumn fx:id="dayColumn" text="Day" prefWidth="120"/>
+                            <TableColumn fx:id="subjectColumn" text="Subject" prefWidth="220"/>
+                            <TableColumn fx:id="startColumn" text="Start" prefWidth="100"/>
+                            <TableColumn fx:id="endColumn" text="End" prefWidth="100"/>
+                            <TableColumn fx:id="descriptionColumn" text="What I'll Teach" prefWidth="320"/>
+                            <TableColumn fx:id="statusColumn" text="Status" prefWidth="120"/>
+                        </columns>
+                    </TableView>
 
-            </GridPane>
-
-            <Label fx:id="messageLabel"
-                   wrapText="true"/>
-
-            <TableView fx:id="availabilityTable"
-                       VBox.vgrow="ALWAYS">
-
-                <columns>
-
-                    <TableColumn fx:id="dayColumn"
-                                 text="Day"
-                                 prefWidth="130"/>
-
-                    <TableColumn fx:id="subjectColumn"
-                                 text="Subject"
-                                 prefWidth="240"/>
-
-                    <TableColumn fx:id="startColumn"
-                                 text="Start"
-                                 prefWidth="110"/>
-
-                    <TableColumn fx:id="endColumn"
-                                 text="End"
-                                 prefWidth="110"/>
-
-                    <TableColumn fx:id="descriptionColumn"
-                                 text="What I'll Teach"
-                                 prefWidth="300"/>
-
-                    <TableColumn fx:id="statusColumn"
-                                 text="Status"
-                                 prefWidth="120"/>
-
-                </columns>
-
-            </TableView>
-
-            <HBox spacing="12">
-
-                <Button text="Edit Selected"
-                        onAction="#handleEditAvailability"/>
-
-                <Button text="Enable / Disable"
-                        onAction="#handleToggleAvailability"/>
-
-                <Button text="Delete"
-                        onAction="#handleDeleteAvailability"/>
-
-            </HBox>
-
-        </VBox>
-
+                    <HBox spacing="12">
+                        <Button text="Edit Selected" onAction="#handleEditAvailability"/>
+                        <Button text="Enable / Disable" onAction="#handleToggleAvailability"/>
+                        <Button text="Delete" onAction="#handleDeleteAvailability"/>
+                    </HBox>
+                </VBox>
+            </content>
+        </ScrollPane>
     </center>
-
 </BorderPane>

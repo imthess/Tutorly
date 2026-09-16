@@ -25,6 +25,19 @@ public class TutorService {
         return tutorRepository.findByUserId(userId);
     }
 
+    public java.util.List<Tutor> searchTutors(
+            String keyword,
+            int subjectId,
+            Double minRate,
+            Double maxRate,
+            Integer minExperience,
+            String dayOfWeek
+    ) throws SQLException {
+        return tutorRepository.searchTutors(
+                keyword, subjectId, minRate, maxRate, minExperience, dayOfWeek
+        );
+    }
+
     public boolean isProfileComplete(int userId)
             throws SQLException {
 

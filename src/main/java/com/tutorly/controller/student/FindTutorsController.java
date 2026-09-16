@@ -1,432 +1,515 @@
 package com.tutorly.controller.student;
 
-import com.tutorly.database.DatabaseConnection;
+import com.tutorly.model.Availability;
+import com.tutorly.model.Student;
 import com.tutorly.model.Tutor;
 import com.tutorly.model.User;
+import com.tutorly.repository.AvailabilityRepository;
+import com.tutorly.service.AvailabilityService;
+import com.tutorly.service.BookingService;
+import com.tutorly.service.StudentService;
+import com.tutorly.service.TutorService;
+import com.tutorly.service.TutorSubjectService;
 import com.tutorly.util.Navigator;
 import com.tutorly.util.Session;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 
-import java.sql.*;
+import java.sql.SQLException;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FindTutorsController {
 
-    @FXML
-    private TextField subjectField;
+    @FXML private TextField keywordField;
+    @FXML private ComboBox<AvailabilityRepository.SubjectOption> subjectComboBox;
+    @FXML private TextField minRateField;
+    @FXML private TextField maxRateField;
+    @FXML private TextField minExperienceField;
+    @FXML private ComboBox<String> dayComboBox;
+    @FXML private VBox tutorCardsBox;
+    @FXML private Label resultCountLabel;
+    @FXML private Label messageLabel;
 
-    @FXML
-    private ListView<String> tutorList;
+    @FXML private Label selectedTutorNameLabel;
+    @FXML private Label selectedTutorMetaLabel;
+    @FXML private Label selectedTutorSubjectsLabel;
+    @FXML private Label selectedTutorBioLabel;
+    @FXML private VBox availabilityBox;
+    @FXML private DatePicker startDatePicker;
+    @FXML private Spinner<Integer> classesSpinner;
+    @FXML private Label bookingSummaryLabel;
+    @FXML private Button requestButton;
 
-    @FXML
-    private Label detailsLabel;
+    private final TutorService tutorService = new TutorService();
+    private final StudentService studentService = new StudentService();
+    private final AvailabilityService availabilityService = new AvailabilityService();
+    private final BookingService bookingService = new BookingService();
+    private final AvailabilityRepository availabilityRepository = new AvailabilityRepository();
+    private final TutorSubjectService tutorSubjectService = new TutorSubjectService();
 
-    @FXML
-    private Label messageLabel;
+    private final List<Tutor> tutors = new ArrayList<>();
+    private final Map<CheckBox, Availability> slotSelections = new HashMap<>();
+    private Tutor selectedTutor;
 
-    private final List<Tutor> tutors =
-            new ArrayList<>();
+    private static final DateTimeFormatter TIME_FORMAT =
+            DateTimeFormatter.ofPattern("h:mm a");
 
     @FXML
     private void initialize() {
-
         User user = Session.getCurrentUser();
 
-        if (user == null ||
-                !"student".equalsIgnoreCase(user.getRole())) {
-
+        if (user == null || !"student".equalsIgnoreCase(user.getRole())) {
             Navigator.navigate("/fxml/login.fxml");
             return;
         }
 
+        setupFilters();
+        setupBookingControls();
+        clearTutorDetails();
         loadTutors();
+    }
+
+    private void setupFilters() {
+        try {
+            List<AvailabilityRepository.SubjectOption> subjects =
+                    new ArrayList<>();
+            subjects.add(new AvailabilityRepository.SubjectOption(0, "All subjects"));
+            subjects.addAll(availabilityRepository.findAllSubjects());
+            subjectComboBox.setItems(FXCollections.observableArrayList(subjects));
+            subjectComboBox.getSelectionModel().selectFirst();
+        } catch (SQLException e) {
+            subjectComboBox.setItems(FXCollections.observableArrayList(
+                    new AvailabilityRepository.SubjectOption(0, "All subjects")
+            ));
+            subjectComboBox.getSelectionModel().selectFirst();
+        }
+
+        dayComboBox.setItems(FXCollections.observableArrayList(
+                "Any day", "Monday", "Tuesday", "Wednesday",
+                "Thursday", "Friday", "Saturday", "Sunday"
+        ));
+        dayComboBox.getSelectionModel().selectFirst();
+        subjectComboBox.setOnShowing(event -> refreshSubjectFilter());
+    }
+
+    private void setupBookingControls() {
+        startDatePicker.setValue(LocalDate.now().plusDays(1));
+        classesSpinner.setValueFactory(
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 52, 10)
+        );
+        requestButton.setDisable(true);
+        bookingSummaryLabel.setText("Select a tutor and one or more weekly slots.");
+    }
+
+    private void refreshSubjectFilter() {
+        try {
+            int selectedId = subjectComboBox.getValue() == null ? 0 : subjectComboBox.getValue().getId();
+            List<AvailabilityRepository.SubjectOption> subjects = new ArrayList<>();
+            subjects.add(new AvailabilityRepository.SubjectOption(0, "All subjects"));
+            subjects.addAll(availabilityRepository.findAllSubjects());
+            subjectComboBox.setItems(FXCollections.observableArrayList(subjects));
+            subjects.stream().filter(option -> option.getId() == selectedId).findFirst()
+                    .ifPresentOrElse(subjectComboBox::setValue, () -> subjectComboBox.getSelectionModel().selectFirst());
+        } catch (SQLException e) {
+            messageLabel.setText("Unable to refresh the subject catalogue.");
+        }
     }
 
     @FXML
     private void handleSearch() {
+        refreshSubjectFilter();
+        loadTutors();
+    }
 
-        loadTutors(
-                subjectField.getText().trim()
-        );
+    @FXML
+    private void handleClearFilters() {
+        keywordField.clear();
+        minRateField.clear();
+        maxRateField.clear();
+        minExperienceField.clear();
+        subjectComboBox.getSelectionModel().selectFirst();
+        dayComboBox.getSelectionModel().selectFirst();
+        loadTutors();
     }
 
     private void loadTutors() {
+        try {
+            Double minRate = parseOptionalDouble(minRateField.getText(), "Minimum hourly rate");
+            Double maxRate = parseOptionalDouble(maxRateField.getText(), "Maximum hourly rate");
+            Integer minExperience = parseOptionalInteger(minExperienceField.getText(), "Minimum experience");
 
-        loadTutors("");
-    }
-
-    private void loadTutors(String subject) {
-
-        tutors.clear();
-
-        String sql = """
-                SELECT DISTINCT
-                    t.tutor_id,
-                    t.user_id,
-                    t.qualifications,
-                    t.experience,
-                    t.hourly_rate,
-                    t.bio,
-                    u.full_name,
-                    u.email,
-                    u.phone,
-                    u.role
-                FROM tutors t
-                JOIN users u
-                    ON t.user_id = u.user_id
-                LEFT JOIN tutor_subjects ts
-                    ON t.tutor_id = ts.tutor_id
-                LEFT JOIN subjects s
-                    ON ts.subject_id = s.subject_id
-                WHERE
-                    (? = '' OR s.subject_name LIKE ?)
-                ORDER BY u.full_name
-                """;
-
-        try (
-                Connection connection =
-                        DatabaseConnection.getConnection();
-                PreparedStatement statement =
-                        connection.prepareStatement(sql)
-        ) {
-
-            String pattern =
-                    "%" + subject + "%";
-
-            statement.setString(1, subject);
-            statement.setString(2, pattern);
-
-            try (ResultSet rs =
-                         statement.executeQuery()) {
-
-                while (rs.next()) {
-
-                    Tutor tutor = new Tutor();
-
-                    tutor.setTutorId(
-                            rs.getInt("tutor_id")
-                    );
-
-                    tutor.setUserId(
-                            rs.getInt("user_id")
-                    );
-
-                    tutor.setFullName(
-                            rs.getString("full_name")
-                    );
-
-                    tutor.setEmail(
-                            rs.getString("email")
-                    );
-
-                    tutor.setPhone(
-                            rs.getString("phone")
-                    );
-
-                    tutor.setRole(
-                            rs.getString("role")
-                    );
-
-                    tutor.setQualifications(
-                            rs.getString("qualifications")
-                    );
-
-                    tutor.setExperience(
-                            rs.getInt("experience")
-                    );
-
-                    tutor.setHourlyRate(
-                            rs.getDouble("hourly_rate")
-                    );
-
-                    tutor.setBio(
-                            rs.getString("bio")
-                    );
-
-                    tutors.add(tutor);
-                }
+            if (minRate != null && maxRate != null && minRate > maxRate) {
+                messageLabel.setText("Minimum rate cannot be greater than maximum rate.");
+                return;
             }
 
-            tutorList.setItems(
-                    FXCollections.observableArrayList(
-                            tutors.stream()
-                                    .map(Tutor::getFullName)
-                                    .toList()
-                    )
-            );
+            int subjectId = subjectComboBox.getValue() == null
+                    ? 0
+                    : subjectComboBox.getValue().getId();
 
+            String day = dayComboBox.getValue();
+            if ("Any day".equals(day)) {
+                day = "";
+            }
+
+            tutors.clear();
+            tutors.addAll(tutorService.searchTutors(
+                    keywordField.getText().trim(),
+                    subjectId,
+                    minRate,
+                    maxRate,
+                    minExperience,
+                    day
+            ));
+
+            renderTutorCards();
+            resultCountLabel.setText(tutors.size() + (tutors.size() == 1 ? " tutor found" : " tutors found"));
+
+            if (tutors.isEmpty()) {
+                messageLabel.setText("No tutors match these filters.");
+                clearTutorDetails();
+            } else {
+                messageLabel.setText("Choose a tutor to view details and request classes.");
+                if (selectedTutor == null || tutors.stream().noneMatch(t -> t.getTutorId() == selectedTutor.getTutorId())) {
+                    showTutor(tutors.get(0));
+                } else {
+                    showTutor(selectedTutor);
+                }
+            }
+        } catch (IllegalArgumentException e) {
+            messageLabel.setText(e.getMessage());
         } catch (SQLException e) {
-
-            messageLabel.setText(
-                    "Unable to load tutors."
-            );
+            e.printStackTrace();
+            messageLabel.setText("Unable to search tutors.");
         }
     }
 
-    @FXML
-    private void handleTutorSelected() {
+    private void renderTutorCards() {
+        tutorCardsBox.getChildren().clear();
 
-        int index =
-                tutorList.getSelectionModel()
-                        .getSelectedIndex();
+        for (Tutor tutor : tutors) {
+            VBox card = new VBox(8);
+            card.getStyleClass().add("tutor-result-card");
+            card.setPadding(new Insets(16));
+            card.setMaxWidth(Double.MAX_VALUE);
 
-        if (index < 0 ||
-                index >= tutors.size()) {
+            Label name = new Label(safe(tutor.getFullName(), "Unnamed tutor"));
+            name.getStyleClass().add("tutor-card-name");
 
+            Label qualification = new Label(safe(tutor.getQualifications(), "Qualifications not provided"));
+            qualification.getStyleClass().add("tutor-card-subtitle");
+            qualification.setWrapText(true);
+
+            Label stats = new Label(
+                    tutor.getExperience() + " years experience   •   " +
+                    formatRate(tutor.getHourlyRate())
+            );
+            stats.getStyleClass().add("tutor-card-stats");
+
+            Label subjects = new Label("Subjects: " + getTutorSubjects(tutor.getTutorId()));
+            subjects.getStyleClass().add("tutor-card-detail");
+            subjects.setWrapText(true);
+
+            Label bio = new Label(truncate(safe(tutor.getBio(), "No bio provided"), 150));
+            bio.getStyleClass().add("tutor-card-detail");
+            bio.setWrapText(true);
+
+            HBox actions = new HBox(10);
+            actions.setAlignment(Pos.CENTER_RIGHT);
+
+            Button detailsButton = new Button("View Details");
+            detailsButton.getStyleClass().add("secondary-button");
+            detailsButton.setOnAction(e -> showTutor(tutor));
+
+            Button selectButton = new Button("Select Tutor");
+            selectButton.getStyleClass().add("primary-button");
+            selectButton.setOnAction(e -> showTutor(tutor));
+
+            actions.getChildren().addAll(detailsButton, selectButton);
+            card.getChildren().addAll(name, qualification, stats, subjects, bio, actions);
+            card.setOnMouseClicked(e -> showTutor(tutor));
+
+            tutorCardsBox.getChildren().add(card);
+        }
+    }
+
+    private void showTutor(Tutor tutor) {
+        selectedTutor = tutor;
+        selectedTutorNameLabel.setText(safe(tutor.getFullName(), "Tutor"));
+        selectedTutorMetaLabel.setText(
+                safe(tutor.getQualifications(), "Qualifications not provided") +
+                "\n" + tutor.getExperience() + " years experience  •  " +
+                formatRate(tutor.getHourlyRate())
+        );
+        selectedTutorSubjectsLabel.setText("Subjects: " + getTutorSubjects(tutor.getTutorId()));
+        selectedTutorBioLabel.setText(safe(tutor.getBio(), "No biography provided."));
+
+        loadAvailability(tutor.getTutorId());
+    }
+
+    private void loadAvailability(int tutorId) {
+        availabilityBox.getChildren().clear();
+        slotSelections.clear();
+        requestButton.setDisable(true);
+
+        try {
+            List<Availability> availability = availabilityService.getTutorAvailability(tutorId).stream()
+                    .filter(a -> "Available".equalsIgnoreCase(a.getStatus()))
+                    .sorted(Comparator.comparingInt(a -> dayNumber(a.getDayOfWeek())))
+                    .toList();
+
+            if (availability.isEmpty()) {
+                availabilityBox.getChildren().add(new Label("No available weekly slots listed."));
+                bookingSummaryLabel.setText("This tutor has no selectable slots right now.");
+                return;
+            }
+
+            for (Availability slot : availability) {
+                CheckBox checkBox = new CheckBox(formatSlot(slot));
+                checkBox.setWrapText(true);
+                checkBox.getStyleClass().add("availability-check");
+                checkBox.setMaxWidth(Double.MAX_VALUE);
+                checkBox.setOnAction(e -> updateBookingSummary());
+                slotSelections.put(checkBox, slot);
+                availabilityBox.getChildren().add(checkBox);
+            }
+
+            bookingSummaryLabel.setText("Select one or more weekly slots, then choose how many classes to request per slot.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            availabilityBox.getChildren().add(new Label("Unable to load tutor availability."));
+        }
+    }
+
+    private void updateBookingSummary() {
+        List<Availability> selected = selectedSlots();
+        requestButton.setDisable(selected.isEmpty());
+
+        if (selected.isEmpty()) {
+            bookingSummaryLabel.setText("Select one or more weekly slots.");
             return;
         }
 
-        Tutor tutor =
-                tutors.get(index);
-
-        detailsLabel.setText(
-                buildTutorDetails(tutor)
+        int classes = classesSpinner.getValue();
+        bookingSummaryLabel.setText(
+                selected.size() + " weekly slot(s) selected • " +
+                classes + " class(es) per selected slot • " +
+                (selected.size() * classes) + " total booking request(s)"
         );
-    }
-
-    private String buildTutorDetails(
-            Tutor tutor
-    ) {
-
-        StringBuilder details =
-                new StringBuilder();
-
-        details.append(
-                "Tutor: "
-        ).append(
-                tutor.getFullName()
-        ).append("\n\n");
-
-        details.append(
-                "Qualifications: "
-        ).append(
-                safe(tutor.getQualifications())
-        ).append("\n");
-
-        details.append(
-                "Experience: "
-        ).append(
-                tutor.getExperience()
-        ).append(" years\n");
-
-        details.append(
-                "Hourly Rate: "
-        ).append(
-                tutor.getHourlyRate()
-        ).append("\n\n");
-
-        details.append(
-                "Subjects: "
-        ).append(
-                getSubjects(tutor.getTutorId())
-        ).append("\n\n");
-
-        details.append(
-                "Availability:\n"
-        );
-
-        details.append(
-                getAvailability(tutor.getTutorId())
-        ).append("\n");
-
-        details.append(
-                "\nAbout:\n"
-        ).append(
-                safe(tutor.getBio())
-        );
-
-        return details.toString();
-    }
-
-    private String getSubjects(int tutorId) {
-
-        String sql = """
-                SELECT s.subject_name
-                FROM tutor_subjects ts
-                JOIN subjects s
-                    ON ts.subject_id = s.subject_id
-                WHERE ts.tutor_id = ?
-                ORDER BY s.subject_name
-                """;
-
-        List<String> subjects =
-                new ArrayList<>();
-
-        try (
-                Connection connection =
-                        DatabaseConnection.getConnection();
-                PreparedStatement statement =
-                        connection.prepareStatement(sql)
-        ) {
-
-            statement.setInt(1, tutorId);
-
-            try (ResultSet rs =
-                         statement.executeQuery()) {
-
-                while (rs.next()) {
-                    subjects.add(
-                            rs.getString("subject_name")
-                    );
-                }
-            }
-
-        } catch (SQLException ignored) {
-        }
-
-        return subjects.isEmpty()
-                ? "Not specified"
-                : String.join(", ", subjects);
-    }
-
-    private String getAvailability(int tutorId) {
-
-        String sql = """
-                SELECT
-                    a.day_of_week,
-                    a.start_time,
-                    a.end_time,
-                    a.description,
-                    a.status,
-                    s.subject_name
-                FROM availability a
-                JOIN subjects s
-                    ON a.subject_id = s.subject_id
-                WHERE a.tutor_id = ?
-                  AND a.status = 'Available'
-                ORDER BY
-                    FIELD(a.day_of_week,
-                    'Monday','Tuesday','Wednesday',
-                    'Thursday','Friday','Saturday','Sunday'),
-                    a.start_time
-                """;
-
-        StringBuilder result =
-                new StringBuilder();
-
-        try (
-                Connection connection =
-                        DatabaseConnection.getConnection();
-                PreparedStatement statement =
-                        connection.prepareStatement(sql)
-        ) {
-
-            statement.setInt(1, tutorId);
-
-            try (ResultSet rs =
-                         statement.executeQuery()) {
-
-                while (rs.next()) {
-
-                    result.append(
-                            rs.getString("day_of_week")
-                    ).append("\n");
-
-                    result.append(
-                            formatTime(
-                                    rs.getTime("start_time")
-                            )
-                    ).append(" – ")
-                    .append(
-                            formatTime(
-                                    rs.getTime("end_time")
-                            )
-                    ).append("\n");
-
-                    result.append(
-                            rs.getString("subject_name")
-                    );
-
-                    String description =
-                            rs.getString("description");
-
-                    if (description != null &&
-                            !description.isBlank()) {
-
-                        result.append(" | ")
-                              .append(description.trim());
-                    }
-
-                    result.append("\n\n");
-                }
-            }
-
-        } catch (SQLException ignored) {
-        }
-
-        if (result.isEmpty()) {
-            return "No available schedule listed.";
-        }
-
-        return result.toString().trim();
-    }
-
-    private String formatTime(Time time) {
-
-        if (time == null) {
-            return "N/A";
-        }
-
-        int hour = time.toLocalTime().getHour();
-        int minute = time.toLocalTime().getMinute();
-
-        String period =
-                hour >= 12 ? "PM" : "AM";
-
-        int displayHour =
-                hour % 12;
-
-        if (displayHour == 0) {
-            displayHour = 12;
-        }
-
-        return String.format(
-                "%d:%02d %s",
-                displayHour,
-                minute,
-                period
-        );
-    }
-
-    private String safe(String value) {
-
-        return value == null ||
-                value.isBlank()
-                ? "Not provided"
-                : value;
     }
 
     @FXML
-    private void handleBookTutor() {
-
-        int index =
-                tutorList.getSelectionModel()
-                        .getSelectedIndex();
-
-        if (index < 0 ||
-                index >= tutors.size()) {
-
-            messageLabel.setText(
-                    "Select a tutor first."
-            );
-
+    private void handleRequestClasses() {
+        if (selectedTutor == null) {
+            messageLabel.setText("Select a tutor first.");
             return;
         }
 
-        Navigator.navigate(
-                "/fxml/student/create-booking.fxml"
-        );
+        List<Availability> selected = selectedSlots();
+        if (selected.isEmpty()) {
+            messageLabel.setText("Select at least one available weekly slot.");
+            return;
+        }
+
+        LocalDate startDate = startDatePicker.getValue();
+        if (startDate == null) {
+            messageLabel.setText("Choose a start date.");
+            return;
+        }
+
+        if (startDate.isBefore(LocalDate.now())) {
+            messageLabel.setText("Start date cannot be in the past.");
+            return;
+        }
+
+        try {
+            Student student = studentService.getStudentProfile(
+                    Session.getCurrentUser().getUserId()
+            );
+
+            if (student == null) {
+                messageLabel.setText("Student profile not found.");
+                return;
+            }
+
+            int classesPerSlot = classesSpinner.getValue();
+            List<String> clashes = validateWeeklySelections(selected);
+            if (!clashes.isEmpty()) {
+                messageLabel.setText("Weekly slot clash: " + String.join("; ", clashes));
+                return;
+            }
+
+            int total = bookingService.createRecurringBookings(
+                    student.getStudentId(),
+                    selectedTutor.getTutorId(),
+                    selected,
+                    startDate,
+                    classesPerSlot
+            );
+
+            messageLabel.setText(
+                    "Request submitted successfully: " + total +
+                    " class requests sent to " + selectedTutor.getFullName() + "."
+            );
+            clearSelectionsAfterBooking();
+        } catch (IllegalArgumentException e) {
+            messageLabel.setText(e.getMessage());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            messageLabel.setText("Unable to submit the class request.");
+        }
+    }
+
+    private List<String> validateWeeklySelections(List<Availability> selected) {
+        List<String> clashes = new ArrayList<>();
+
+        for (int i = 0; i < selected.size(); i++) {
+            for (int j = i + 1; j < selected.size(); j++) {
+                Availability a = selected.get(i);
+                Availability b = selected.get(j);
+
+                if (!a.getDayOfWeek().equalsIgnoreCase(b.getDayOfWeek())) {
+                    continue;
+                }
+
+                if (overlaps(a.getStartTime(), a.getEndTime(), b.getStartTime(), b.getEndTime())) {
+                    clashes.add(
+                            a.getDayOfWeek() + " " +
+                            formatTime(a.getStartTime()) + "–" + formatTime(a.getEndTime()) +
+                            " overlaps " + formatTime(b.getStartTime()) + "–" + formatTime(b.getEndTime())
+                    );
+                }
+            }
+        }
+
+        return clashes;
+    }
+
+    private boolean overlaps(LocalTime startA, LocalTime endA, LocalTime startB, LocalTime endB) {
+        return startA.isBefore(endB) && startB.isBefore(endA);
+    }
+
+    private void clearSelectionsAfterBooking() {
+        slotSelections.keySet().forEach(checkBox -> checkBox.setSelected(false));
+        updateBookingSummary();
+    }
+
+    private List<Availability> selectedSlots() {
+        List<Availability> selected = new ArrayList<>();
+        for (Map.Entry<CheckBox, Availability> entry : slotSelections.entrySet()) {
+            if (entry.getKey().isSelected()) {
+                selected.add(entry.getValue());
+            }
+        }
+        selected.sort(Comparator.comparingInt(a -> dayNumber(a.getDayOfWeek())));
+        return selected;
+    }
+
+    private String getTutorSubjects(int tutorId) {
+        try {
+            return tutorSubjectService.getTutorSubjects(tutorId).stream()
+                    .filter(name -> name != null && !name.isBlank())
+                    .distinct()
+                    .sorted()
+                    .reduce((a, b) -> a + ", " + b)
+                    .orElse("Not specified");
+        } catch (SQLException e) {
+            return "Not specified";
+        }
+    }
+
+    private int dayNumber(String day) {
+        try {
+            return DayOfWeek.valueOf(day.toUpperCase()).getValue();
+        } catch (Exception e) {
+            return 8;
+        }
+    }
+
+    private String formatSlot(Availability slot) {
+        StringBuilder text = new StringBuilder();
+        text.append(slot.getDayOfWeek())
+                .append("  •  ")
+                .append(formatTime(slot.getStartTime()))
+                .append(" – ")
+                .append(formatTime(slot.getEndTime()))
+                .append("  •  ")
+                .append(safe(slot.getSubjectName(), "Subject not specified"));
+
+        if (slot.getDescription() != null && !slot.getDescription().isBlank()) {
+            text.append("\n").append(slot.getDescription().trim());
+        }
+
+        return text.toString();
+    }
+
+    private String formatTime(LocalTime time) {
+        return time == null ? "N/A" : time.format(TIME_FORMAT);
+    }
+
+    private String formatRate(double rate) {
+        return String.format("%.2f BDT/hour", rate);
+    }
+
+    private String truncate(String value, int maxLength) {
+        return value.length() <= maxLength ? value : value.substring(0, maxLength - 3) + "...";
+    }
+
+    private String safe(String value, String fallback) {
+        return value == null || value.isBlank() ? fallback : value.trim();
+    }
+
+    private Double parseOptionalDouble(String text, String fieldName) {
+        if (text == null || text.isBlank()) return null;
+        try {
+            double value = Double.parseDouble(text.trim());
+            if (value < 0) throw new IllegalArgumentException(fieldName + " cannot be negative.");
+            return value;
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(fieldName + " must be a valid number.");
+        }
+    }
+
+    private Integer parseOptionalInteger(String text, String fieldName) {
+        if (text == null || text.isBlank()) return null;
+        try {
+            int value = Integer.parseInt(text.trim());
+            if (value < 0) throw new IllegalArgumentException(fieldName + " cannot be negative.");
+            return value;
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(fieldName + " must be a whole number.");
+        }
+    }
+
+    private void clearTutorDetails() {
+        selectedTutor = null;
+        selectedTutorNameLabel.setText("Select a tutor");
+        selectedTutorMetaLabel.setText("Tutor details will appear here.");
+        selectedTutorSubjectsLabel.setText("Subjects: —");
+        selectedTutorBioLabel.setText("—");
+        availabilityBox.getChildren().clear();
+        slotSelections.clear();
+        requestButton.setDisable(true);
+        bookingSummaryLabel.setText("Select a tutor and one or more weekly slots.");
     }
 
     @FXML
     private void handleBack() {
-
-        Navigator.navigate(
-                "/fxml/student/dashboard.fxml"
-        );
+        Navigator.navigate("/fxml/student/dashboard.fxml");
     }
 }
